@@ -15,7 +15,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// Task Schema matches your Prisma enums and relations
+// Task Schema ensuring data integrity for your Senior QA testing
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
@@ -49,22 +49,23 @@ router.post(
         },
       });
 
+      // Automatically record activity for audit trail
       await recordActivity(req.user!.userId, `TASK_CREATED: ${task.title}`);
       res.status(201).json(task);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.issues });
+        return res.status(400).json({ error: error.issues }); // Return specific validation issues
       }
       res.status(500).json({ error: "Failed to create task" });
     }
   },
 );
 
-// PUT /api/tasks/:id - Update task (status, priority, or assignee)
+// PUT /api/tasks/:id - Update task details or assignment
 router.put("/:id", authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const id = req.params.id as string; // Cast to satisfy strict types
-    const validatedData = taskSchema.partial().parse(req.body); // Allow partial updates
+    const id = req.params.id as string; // Fix: Cast to string for strict TS
+    const validatedData = taskSchema.partial().parse(req.body);
 
     const task = await prisma.task.update({
       where: { id },
@@ -82,7 +83,7 @@ router.put("/:id", authenticateToken, async (req: AuthRequest, res) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.issues });
     }
-    res.status(400).json({ error: "Update failed" });
+    res.status(400).json({ error: "Update failed or task not found" });
   }
 });
 
