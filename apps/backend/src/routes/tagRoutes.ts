@@ -57,4 +57,45 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+// PUT /api/tags/:id - Update tag properties
+router.put(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("ADMIN", "MANAGER"),
+  async (req: AuthRequest, res) => {
+    try {
+      const id = req.params.id as string;
+      const validatedData = tagSchema.partial().parse(req.body);
+
+      const tag = await prisma.tag.update({
+        where: { id },
+        data: validatedData,
+      });
+
+      await recordActivity(req.user!.userId, `TAG_UPDATED: ${tag.name}`);
+      res.json(tag);
+    } catch (error) {
+      res.status(400).json({ error: "Update failed" });
+    }
+  },
+);
+
+// DELETE /api/tags/:id - Remove a tag globally
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("ADMIN"),
+  async (req: AuthRequest, res) => {
+    try {
+      const id = req.params.id as string;
+      await prisma.tag.delete({ where: { id } });
+
+      await recordActivity(req.user!.userId, `TAG_DELETED: ${id}`);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete tag" });
+    }
+  },
+);
+
 export default router;

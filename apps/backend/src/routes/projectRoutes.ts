@@ -21,6 +21,7 @@ const projectSchema = z.object({
   status: z.enum(["ACTIVE", "ARCHIVED"]).optional(), // Matches schema
 });
 
+// POST /api/projects
 router.post(
   "/",
   authenticateToken,
@@ -51,6 +52,7 @@ router.post(
   },
 );
 
+// PUT /api/projects/:id
 router.put(
   "/:id",
   authenticateToken,
