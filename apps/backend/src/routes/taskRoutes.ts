@@ -24,6 +24,7 @@ const taskSchema = z.object({
   projectId: z.string().uuid("Invalid Project ID"),
   assigneeId: z.string().uuid("Invalid User ID").optional().nullable(),
   dueDate: z.string().datetime().optional().nullable(),
+  tags: z.array(z.string().uuid()).optional(), // Array of Tag IDs
 });
 
 // POST /api/tasks - Create a task and assign to a user
@@ -64,26 +65,34 @@ router.post(
 // PUT /api/tasks/:id - Update task details or assignment
 router.put("/:id", authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const id = req.params.id as string; // Fix: Cast to string for strict TS
-    const validatedData = taskSchema.partial().parse(req.body);
+    const id = req.params.id as string;
+    const { tags, ...rest } = taskSchema.partial().parse(req.body);
 
     const task = await prisma.task.update({
       where: { id },
       data: {
-        ...validatedData,
-        dueDate: validatedData.dueDate
-          ? new Date(validatedData.dueDate)
+        ...rest,
+        dueDate: rest.dueDate ? new Date(rest.dueDate) : undefined,
+        // Many-to-Many connection logic
+        tags: tags
+          ? {
+              set: tags.map((tagId) => ({ id: tagId })), // Overwrites existing tags with new list
+            }
           : undefined,
       },
+      include: { tags: true }, // Return the updated tags in the response
     });
 
-    await recordActivity(req.user!.userId, `TASK_UPDATED: ${task.title}`);
+    await recordActivity(
+      req.user!.userId,
+      `TASK_UPDATED: ${task.title} (Tags modified)`,
+    );
     res.json(task);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.issues });
     }
-    res.status(400).json({ error: "Update failed or task not found" });
+    res.status(400).json({ error: "Update failed" });
   }
 });
 

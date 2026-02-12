@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import userRoutes from "./routes/userRoutes";
+import tagRoutes from "./routes/tagRoutes";
 
 // Import Middleware
 import { loggerMiddleware } from "./middleware/loggerMiddleware";
@@ -32,6 +33,7 @@ app.use("/api/projects", authenticateToken, projectRoutes);
 app.use("/api/users", authenticateToken, userRoutes);
 app.use("/api/tasks", authenticateToken, taskRoutes);
 app.use("/api/logs", authenticateToken, logRoutes);
+app.use("/api/tags", authenticateToken, tagRoutes);
 
 app.use(errorHandler);
 
