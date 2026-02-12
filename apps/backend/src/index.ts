@@ -4,6 +4,7 @@ import * as dotenv from "dotenv"; //
 import path from "path";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // Register modular routes
+app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 
