@@ -7,6 +7,7 @@ import path from "path";
 import authRoutes from "./routes/authRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
+import userRoutes from "./routes/userRoutes";
 
 // Import Middleware
 import { loggerMiddleware } from "./middleware/loggerMiddleware";
@@ -27,6 +28,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 // Protected Routes - Require valid JWT
 app.use("/api/projects", authenticateToken, projectRoutes);
+app.use("/api/users", authenticateToken, userRoutes);
 app.use("/api/tasks", authenticateToken, taskRoutes);
 
 app.use(errorHandler);
