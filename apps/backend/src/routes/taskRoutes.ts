@@ -96,4 +96,29 @@ router.put("/:id", authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// DELETE /api/tasks/:id - Remove a task and log the action
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("ADMIN", "MANAGER"),
+  async (req: AuthRequest, res) => {
+    try {
+      const id = req.params.id as string;
+
+      // We fetch the task first to get the title for a better log message
+      const task = await prisma.task.findUnique({ where: { id } });
+      if (!task) return res.status(404).json({ error: "Task not found" });
+
+      await prisma.task.delete({
+        where: { id },
+      });
+
+      await recordActivity(req.user!.userId, `TASK_DELETED: ${task.title}`);
+      res.status(204).send(); // 204 No Content is standard for successful deletion
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete task" });
+    }
+  },
+);
+
 export default router;

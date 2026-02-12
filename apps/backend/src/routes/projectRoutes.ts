@@ -80,4 +80,33 @@ router.put(
   },
 );
 
+// DELETE /api/projects/:id - Remove a project and its associated tasks
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("ADMIN"),
+  async (req: AuthRequest, res) => {
+    try {
+      const id = req.params.id as string;
+
+      const project = await prisma.project.findUnique({ where: { id } });
+      if (!project) return res.status(404).json({ error: "Project not found" });
+
+      // Transaction ensures both the project and its tasks are deleted safely
+      await prisma.$transaction([
+        prisma.task.deleteMany({ where: { projectId: id } }),
+        prisma.project.delete({ where: { id } }),
+      ]);
+
+      await recordActivity(
+        req.user!.userId,
+        `PROJECT_DELETED: ${project.name}`,
+      );
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete project" });
+    }
+  },
+);
+
 export default router;
