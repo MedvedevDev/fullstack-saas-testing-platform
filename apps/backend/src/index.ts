@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 import path from "path";
 
 // Import Routers
+import logRoutes from "./routes/logRoutes";
 import authRoutes from "./routes/authRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
@@ -30,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/projects", authenticateToken, projectRoutes);
 app.use("/api/users", authenticateToken, userRoutes);
 app.use("/api/tasks", authenticateToken, taskRoutes);
+app.use("/api/logs", authenticateToken, logRoutes);
 
 app.use(errorHandler);
 
