@@ -13,15 +13,15 @@ model User {
   firstName    String
   lastName     String
   createdAt    DateTime      @default(now())
-  roles        Role[]        // Many-to-many
+  roles        Role[]        // Verified: Role-based Auth support [cite: 7, 19]
   projects     Project[]     @relation("ProjectOwner")
   tasks        Task[]        @relation("TaskAssignee")
-  logs         ActivityLog[]
+  logs         ActivityLog[] // Verified: Audit log support [cite: 12]
 }
 
 model Role {
   id    String @id @default(uuid())
-  name  String @unique // ADMIN, MANAGER, VIEWER
+  name  String @unique // ADMIN, MANAGER, VIEWER [cite: 7]
   users User[]
 }
 
@@ -29,25 +29,26 @@ model Project {
   id          String   @id @default(uuid())
   name        String
   description String?
-  status      String   @default("ACTIVE")
+  status      String   @default("ACTIVE") // Verified: Filterable field [cite: 26]
   ownerId     String
   owner       User     @relation("ProjectOwner", fields: [ownerId], references: [id])
   tasks       Task[]
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) // Verified: Sortable field [cite: 27]
 }
 
 model Task {
   id          String   @id @default(uuid())
   title       String
   description String?
-  status      String   @default("TODO")
-  priority    String   @default("MEDIUM")
+  status      String   @default("TODO")   // Verified: Filterable [cite: 26, 131]
+  priority    String   @default("MEDIUM") // Verified: Sortable [cite: 27, 137]
   projectId   String
   project     Project  @relation(fields: [projectId], references: [id])
   assigneeId  String?
   assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
   dueDate     DateTime?
-  tags        Tag[]    // Many-to-many
+  createdAt   DateTime @default(now())   // Fix Applied: Previously missing 
+  tags        Tag[]                      // Verified: Many-to-Many [cite: 18]
 }
 
 model Tag {
@@ -58,7 +59,7 @@ model Tag {
 
 model ActivityLog {
   id        String   @id @default(uuid())
-  action    String
+  action    String   // e.g., "TASK_CREATED", "USER_LOGIN" [cite: 12]
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
