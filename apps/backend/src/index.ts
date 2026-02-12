@@ -19,7 +19,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 
-// Health check endpoint for CI/CD and automation pings [cite: 79]
+// Health check endpoint for CI/CD and automation pings
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
 app.listen(PORT, () => {

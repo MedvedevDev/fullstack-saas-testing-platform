@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg"; // Required for Prisma 7
-import { Pool } from "pg"; // Required for Prisma 7
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+import {
+  authenticateToken,
+  authorizeRoles,
+} from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -19,7 +23,7 @@ router.get("/", async (req, res) => {
           select: { firstName: true, lastName: true, email: true }, // Pulling User details
         },
         _count: {
-          select: { tasks: true }, // Relation testing: counting tasks per project [cite: 155]
+          select: { tasks: true }, // Relation testing: counting tasks per project
         },
       },
     });
@@ -29,5 +33,23 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch projects" });
   }
 });
+
+// POST /api/projects - Only ADMIN or MANAGER can create projects
+router.post(
+  "/",
+  authenticateToken,
+  authorizeRoles("ADMIN", "MANAGER"),
+  async (req, res) => {
+    try {
+      const { name, description, ownerId } = req.body;
+      const project = await prisma.project.create({
+        data: { name, description, ownerId },
+      });
+      res.status(201).json(project);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to create project" });
+    }
+  },
+);
 
 export default router;

@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg"; // Required for Prisma 7
-import { Pool } from "pg"; //
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const router = Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// GET /api/tasks - Includes Pagination and Filtering [cite: 31, 32]
+// GET /api/tasks - Includes Pagination and Filtering
 router.get("/", async (req, res) => {
   try {
     const {
@@ -35,7 +35,6 @@ router.get("/", async (req, res) => {
           project: { select: { name: true } },
           assignee: { select: { firstName: true, lastName: true } },
         },
-        // Now 'createdAt' is a known property
         orderBy: { [sortBy as string]: sortOrder as "asc" | "desc" },
       }),
       prisma.task.count({ where }),

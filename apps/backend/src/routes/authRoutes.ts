@@ -13,7 +13,7 @@ const prisma = new PrismaClient({ adapter });
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-key";
 
-// Validation Schema for Registration [cite: 101]
+// Validation Schema for Registration
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -53,7 +53,7 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { roles: true }, // Include roles for RBAC testing [cite: 124]
+      include: { roles: true }, // Include roles for RBAC testing
     });
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
