@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import TasksPage from "./pages/TasksPage";
 import ProjectsPage from "./pages/ProjectsPage";
+import DashboardPage from "./pages/DashboardPage";
 
 function App() {
   return (
@@ -19,19 +20,7 @@ function App() {
         {/* Protected Dashboard Routes */}
         <Route element={<DashboardLayout />}>
           {/* Default dashboard view */}
-          <Route
-            path="/dashboard"
-            element={
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-flow-text-main">
-                  Dashboard Overview
-                </h2>
-                <p className="text-flow-text-muted">
-                  Welcome to your workspace.
-                </p>
-              </div>
-            }
-          />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route
