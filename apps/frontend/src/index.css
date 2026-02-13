@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-flow-indigo: #2d336b; /* Sidebar / Header */
+  --color-flow-bg: #f8f9fc; /* Main Background */
+  --color-flow-blue: #2563eb; /* Primary Buttons */
+  --color-flow-border: #e2e8f0; /* Card/Input Borders */
+  --color-flow-text-main: #1e293b; /* Primary Headings */
+  --color-flow-text-muted: #64748b; /* Subtext */
+}
