@@ -3,6 +3,9 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { AuthRequest, authorizeRoles } from "../middleware/authMiddleware";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const router = Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });

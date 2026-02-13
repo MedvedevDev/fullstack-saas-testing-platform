@@ -27,6 +27,43 @@ const taskSchema = z.object({
   tags: z.array(z.string().uuid()).optional(), // Array of Tag IDs
 });
 
+// GET /api/tasks - Fetch tasks with advanced filtering
+router.get("/", authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { status, priority, assigneeId, projectId, search } = req.query;
+
+    // Build dynamic filter object
+    const where: any = {};
+
+    if (status) where.status = status;
+    if (priority) where.priority = priority;
+    if (assigneeId) where.assigneeId = assigneeId;
+    if (projectId) where.projectId = projectId;
+
+    // Add basic text search on title if provided
+    if (search) {
+      where.title = {
+        contains: search as string,
+        mode: "insensitive",
+      };
+    }
+
+    const tasks = await prisma.task.findMany({
+      where,
+      include: {
+        project: { select: { name: true } },
+        assignee: { select: { firstName: true, lastName: true } },
+        tags: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch tasks" });
+  }
+});
+
 // POST /api/tasks - Create a task and assign to a user
 router.post(
   "/",
@@ -57,7 +94,8 @@ router.post(
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.issues }); // Return specific validation issues
       }
-      res.status(500).json({ error: "Failed to create task" });
+      console.error("TASK_CREATE_ERROR:", error); // This will tell you if it's a "Foreign key constraint failed"
+      res.status(500).json({ error: "Failed to create task", details: error });
     }
   },
 );

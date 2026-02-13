@@ -5,66 +5,87 @@ import { Pool } from "pg";
 import { faker } from "@faker-js/faker";
 import * as dotenv from "dotenv";
 import path from "path";
+import bcrypt from "bcryptjs";
 
-// 1. Load env
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-// 2. Setup the connection pool and adapter (REQUIRED for Prisma 7)
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
-
-// 3. Pass the adapter to the client
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("Clean-up: Deleting old data...");
+  console.log("🚀 Starting seed...");
+
+  // 1. Clean-up (Order matters because of Foreign Keys!)
+  console.log("🧹 Cleaning old data...");
   await prisma.activityLog.deleteMany();
   await prisma.task.deleteMany();
+  await prisma.tag.deleteMany();
   await prisma.project.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.role.deleteMany();
 
-  console.log("Seeding: Creating 50 users...");
+  // 2. Create Essential Roles
+  console.log("🔐 Creating roles...");
+  const adminRole = await prisma.role.create({ data: { name: "ADMIN" } });
+  const managerRole = await prisma.role.create({ data: { name: "MANAGER" } });
+  const viewerRole = await prisma.role.create({ data: { name: "VIEWER" } });
+  const roles = [adminRole, managerRole, viewerRole];
+
+  // 3. Create Users
+  console.log("👥 Creating 50 users...");
+  const passwordHash = await bcrypt.hash("password123", 10);
+
   const users = await Promise.all(
     Array.from({ length: 50 }).map(() =>
       prisma.user.create({
         data: {
-          email: faker.internet.email(),
+          email: faker.internet.email().toLowerCase(),
           firstName: faker.person.firstName(),
           lastName: faker.person.lastName(),
-          passwordHash: "hashed_password_123",
+          passwordHash,
+          // FIX: Randomly assign one role to each user
+          roles: {
+            connect: { id: roles[Math.floor(Math.random() * roles.length)].id },
+          },
         },
       }),
     ),
   );
 
-  console.log("Seeding: Creating 200 projects...");
+  // 4. Create Projects
+  console.log("📁 Creating 200 projects...");
   const projects = await Promise.all(
     Array.from({ length: 200 }).map(() =>
       prisma.project.create({
         data: {
           name: faker.company.catchPhrase(),
           description: faker.lorem.sentence(),
+          status: faker.helpers.arrayElement(["ACTIVE", "ARCHIVED"]),
           ownerId: users[Math.floor(Math.random() * users.length)].id,
         },
       }),
     ),
   );
 
-  console.log("Seeding: Creating 800 tasks...");
+  // 5. Create Tasks
+  console.log("✅ Creating 800 tasks...");
   await Promise.all(
     Array.from({ length: 800 }).map(() =>
       prisma.task.create({
         data: {
           title: faker.hacker.phrase(),
-          status: faker.helpers.arrayElement(["TODO", "IN_PROGRESS", "DONE"]),
-          priority: faker.helpers.arrayElement(["LOW", "MEDIUM", "HIGH"]),
+          description: faker.lorem.paragraph(),
+          status: faker.helpers.arrayElement(["TODO", "IN_PROGRESS", "DONE"]), // Now matches Enum
+          priority: faker.helpers.arrayElement(["LOW", "MEDIUM", "HIGH"]), // Now matches Enum
           projectId: projects[Math.floor(Math.random() * projects.length)].id,
+          assigneeId: users[Math.floor(Math.random() * users.length)].id,
         },
       }),
     ),
   );
 
-  console.log("✅ Seed successful: 1,000+ records created.");
+  console.log("✨ Seed successful: Roles, Users, Projects, and Tasks created.");
 }
 
 main()
@@ -74,5 +95,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    await pool.end(); // Don't forget to close the pool!
+    await pool.end();
   });

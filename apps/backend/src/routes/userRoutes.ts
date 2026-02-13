@@ -8,6 +8,9 @@ import {
   authorizeRoles,
 } from "../middleware/authMiddleware";
 import { recordActivity } from "../utils/logger";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const router = Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });

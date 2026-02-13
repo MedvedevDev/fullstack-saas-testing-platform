@@ -5,6 +5,9 @@ import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const router = Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
