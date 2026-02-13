@@ -15,7 +15,7 @@ import dashboardRoutes from "./routes/dashboardRoutes";
 // Import Middleware
 import { loggerMiddleware } from "./middleware/loggerMiddleware";
 import { errorHandler } from "./middleware/errorMiddleware";
-import { authenticateToken } from "./middleware/authMiddleware";
+// Note: authenticateToken is no longer needed here since it's inside the routes
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
@@ -26,20 +26,24 @@ app.use(loggerMiddleware);
 app.use(cors());
 app.use(express.json());
 
-// --- Register modular routes
+// --- Register modular routes ---
+
 // Public Routes
 app.use("/api/auth", authRoutes);
-// Protected Routes - Require valid JWT
-app.use("/api/projects", authenticateToken, projectRoutes);
-app.use("/api/users", authenticateToken, userRoutes);
-app.use("/api/tasks", authenticateToken, taskRoutes);
-app.use("/api/logs", authenticateToken, logRoutes);
-app.use("/api/tags", authenticateToken, tagRoutes);
-app.use("/api/dashboard", authenticateToken, dashboardRoutes);
+
+// Protected Routes
+// (Auth logic is now handled INSIDE these files for better modularity)
+app.use("/api/projects", projectRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/tags", tagRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+
+// *CRITICAL*: Ensure logRoutes has auth inside it (see step 2 below)
+app.use("/api/logs", logRoutes);
 
 app.use(errorHandler);
 
-// Health check endpoint for CI/CD and automation pings
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
 app.listen(PORT, () => {

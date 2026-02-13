@@ -7,6 +7,7 @@ import {
 import LoginPage from "./pages/LoginPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import TasksPage from "./pages/TasksPage";
+import ProjectsPage from "./pages/ProjectsPage";
 
 function App() {
   return (
@@ -31,19 +32,8 @@ function App() {
               </div>
             }
           />
-
-          {/* The Tasks Page we just built */}
           <Route path="/tasks" element={<TasksPage />} />
-
-          {/* Placeholders for other sections */}
-          <Route
-            path="/projects"
-            element={
-              <div className="text-2xl font-bold text-flow-text-main">
-                Projects
-              </div>
-            }
-          />
+          <Route path="/projects" element={<ProjectsPage />} />
           <Route
             path="/users"
             element={

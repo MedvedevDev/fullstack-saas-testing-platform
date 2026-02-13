@@ -8,23 +8,27 @@ import {
   Calendar,
 } from "lucide-react";
 import api from "../api/axios";
-import type { Task } from "../types/task"; // Added 'type' keyword here
+import CreateTaskModal from "../components/CreateTaskModal";
+import type { Task } from "../types/task";
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/tasks");
+      setTasks(response.data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await api.get("/tasks");
-        setTasks(response.data);
-      } catch (err) {
-        console.error("Fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchTasks();
   }, []);
 
@@ -33,7 +37,6 @@ const TasksPage = () => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      year: "numeric",
     });
   };
 
@@ -44,7 +47,7 @@ const TasksPage = () => {
       case "IN_PROGRESS":
         return <Clock className="h-4 w-4 text-blue-500" />;
       default:
-        return <AlertCircle className="h-4 w-4 text-flow-text-muted" />;
+        return <AlertCircle className="h-4 w-4 text-slate-400" />;
     }
   };
 
@@ -57,7 +60,10 @@ const TasksPage = () => {
             Tracking all activities and deadlines
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-flow-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-sm">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-flow-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-sm active:scale-95"
+        >
           <Plus className="h-4 w-4" />
           Create Task
         </button>
@@ -92,21 +98,33 @@ const TasksPage = () => {
                   colSpan={6}
                   className="px-6 py-10 text-center text-flow-text-muted"
                 >
-                  Loading...
+                  Updating task list...
+                </td>
+              </tr>
+            ) : tasks.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-6 py-10 text-center text-flow-text-muted"
+                >
+                  No tasks found.
                 </td>
               </tr>
             ) : (
               tasks.map((task) => (
                 <tr
                   key={task.id}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="hover:bg-gray-50 transition-colors group"
                 >
                   <td className="px-6 py-4">
-                    <div className="font-medium text-flow-text-main">
+                    <div className="font-medium text-flow-text-main group-hover:text-flow-blue transition-colors">
                       {task.title}
                     </div>
-                    <div className="text-xs text-flow-text-muted">
-                      ID: {task.id.slice(0, 8)}
+
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 uppercase tracking-wide">
+                        {task.project?.name || "No Project"}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -148,6 +166,13 @@ const TasksPage = () => {
           </tbody>
         </table>
       </div>
+
+      {isModalOpen && (
+        <CreateTaskModal
+          onClose={() => setIsModalOpen(false)}
+          onRefresh={fetchTasks}
+        />
+      )}
     </div>
   );
 };

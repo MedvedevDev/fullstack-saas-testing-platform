@@ -12,4 +12,7 @@ export interface Task {
   dueDate: string | null; // DateTime? in Prisma
   createdAt: string; // @default(now())
   updatedAt: string; // @updatedAt
+  project?: {
+    name: string;
+  };
 }

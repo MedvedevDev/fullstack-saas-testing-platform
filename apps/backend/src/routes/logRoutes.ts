@@ -2,7 +2,12 @@ import { Router, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { AuthRequest, authorizeRoles } from "../middleware/authMiddleware";
+// Import authenticateToken here
+import {
+  AuthRequest,
+  authenticateToken,
+  authorizeRoles,
+} from "../middleware/authMiddleware";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -10,11 +15,12 @@ dotenv.config();
 const router = Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
-
-// FIX: Pass the adapter into the PrismaClient constructor
 const prisma = new PrismaClient({ adapter });
 
-// GET /api/logs - Fetch all activity logs (Restricted to ADMIN/MANAGER)
+// ADD THIS: Global protection for logs
+router.use(authenticateToken);
+
+// GET /api/logs
 router.get(
   "/",
   authorizeRoles("ADMIN", "MANAGER"),
