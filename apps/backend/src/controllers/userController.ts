@@ -1,8 +1,7 @@
 import { Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { recordActivity } from "../utils/logger";
-import { prisma } from "../lib/prisma";
 
 // GET /api/users/me
 export const getMyProfile = async (req: AuthRequest, res: Response) => {
@@ -17,7 +16,6 @@ export const getMyProfile = async (req: AuthRequest, res: Response) => {
         roles: { select: { name: true } },
       },
     });
-
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   } catch (error) {
@@ -37,6 +35,7 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
         roles: { select: { name: true } },
         createdAt: true,
       },
+      orderBy: { createdAt: "desc" },
     });
     res.json(users);
   } catch (error) {
@@ -49,14 +48,42 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const targetUser = await prisma.user.findUnique({ where: { id } });
-    if (!targetUser) return res.status(404).json({ error: "User not found" });
+    // 1. Prevent deleting yourself
+    if (id === req.user?.userId) {
+      return res
+        .status(400)
+        .json({ error: "You cannot delete your own account." });
+    }
 
-    await prisma.user.delete({ where: { id } });
+    // 2. SAFETY CHECK: Do they own projects?
+    const projectCount = await prisma.project.count({ where: { ownerId: id } });
+    if (projectCount > 0) {
+      return res.status(400).json({
+        error: `Cannot delete user: They own ${projectCount} active projects. Please delete or reassign them first.`,
+      });
+    }
 
-    await recordActivity(req.user!.userId, `USER_DELETED: ${targetUser.email}`);
+    // 3. SAFETY CHECK: Are they assigned to tasks?
+    const taskCount = await prisma.task.count({ where: { assigneeId: id } });
+    if (taskCount > 0) {
+      return res.status(400).json({
+        error: `Cannot delete user: They are assigned to ${taskCount} active tasks. Please unassign them first.`,
+      });
+    }
+
+    // 4. Clean up logs and delete user
+    // We delete logs first because they are safe to remove
+    await prisma.activityLog.deleteMany({ where: { userId: id } });
+
+    const deletedUser = await prisma.user.delete({ where: { id } });
+
+    await recordActivity(
+      req.user!.userId,
+      `USER_DELETED: ${deletedUser.email}`,
+    );
     res.status(204).send();
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete user" });
+    console.error("Delete user error:", error);
+    res.status(500).json({ error: "Failed to delete user." });
   }
 };

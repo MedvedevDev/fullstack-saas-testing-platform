@@ -9,6 +9,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import TasksPage from "./pages/TasksPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import DashboardPage from "./pages/DashboardPage";
+import UsersPage from "./pages/UsersPage";
 
 function App() {
   return (
@@ -19,24 +20,16 @@ function App() {
 
         {/* Protected Dashboard Routes */}
         <Route element={<DashboardLayout />}>
-          {/* Default dashboard view */}
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
-          <Route
-            path="/users"
-            element={
-              <div className="text-2xl font-bold text-flow-text-main">
-                Team Members
-              </div>
-            }
-          />
+          <Route path="/users" element={<UsersPage />} />
         </Route>
 
         {/* Redirect root to login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Catch-all: redirect to dashboard if logged in (handled by logic later) or login */}
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

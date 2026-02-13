@@ -1,0 +1,201 @@
+import { useState, useEffect } from "react";
+import {
+  Mail,
+  Shield,
+  Trash2,
+  User as UserIcon,
+  Calendar,
+  Search,
+  AlertTriangle,
+} from "lucide-react";
+import api from "../api/axios";
+import type { User } from "../types/user";
+
+const UsersPage = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/users");
+      setUsers(response.data);
+      setError("");
+    } catch (err: any) {
+      console.error("Failed to fetch users", err);
+      // Detailed error handling
+      if (err.response?.status === 403) {
+        setError(
+          "Access Denied: You need ADMIN permissions to view this list.",
+        );
+      } else {
+        setError("Failed to load team members. Please check backend logs.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleDelete = async (userId: string) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+    try {
+      await api.delete(`/users/${userId}`);
+      // Remove from UI on success
+      setUsers(users.filter((u) => u.id !== userId));
+      alert("User deleted successfully.");
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      // Show the specific error message from the backend (e.g., "Cannot delete user...")
+      const message = err.response?.data?.error || "Failed to delete user.";
+      alert(message);
+    }
+  };
+
+  const filteredUsers = users.filter((user) =>
+    `${user.firstName} ${user.lastName} ${user.email}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()),
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-flow-text-main">
+            Team Members
+          </h2>
+          <p className="text-sm text-flow-text-muted">
+            Manage access and roles
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search..."
+            className="pl-9 pr-4 py-2 border border-flow-border rounded-lg text-sm w-full sm:w-64 focus:ring-2 focus:ring-flow-blue/20 outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm font-medium border border-red-100 flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" />
+          {error}
+        </div>
+      )}
+
+      {/* Table Section */}
+      <div className="bg-white border border-flow-border rounded-xl overflow-hidden shadow-sm">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-gray-50 border-b border-flow-border">
+            <tr>
+              <th className="px-6 py-4 text-xs font-bold uppercase text-flow-text-muted">
+                User
+              </th>
+              <th className="px-6 py-4 text-xs font-bold uppercase text-flow-text-muted">
+                Role
+              </th>
+              <th className="px-6 py-4 text-xs font-bold uppercase text-flow-text-muted">
+                Joined
+              </th>
+              <th className="px-6 py-4 text-xs font-bold uppercase text-flow-text-muted text-right">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-flow-border">
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="px-6 py-10 text-center text-flow-text-muted"
+                >
+                  Loading team...
+                </td>
+              </tr>
+            ) : filteredUsers.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="px-6 py-10 text-center text-flow-text-muted"
+                >
+                  No users found.
+                </td>
+              </tr>
+            ) : (
+              filteredUsers.map((user) => {
+                const isAdmin = user.roles.some((r) => r.name === "ADMIN");
+                return (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white ${isAdmin ? "bg-indigo-500" : "bg-flow-blue"}`}
+                        >
+                          {user.firstName[0]}
+                          {user.lastName[0]}
+                        </div>
+                        <div>
+                          <div className="font-medium text-flow-text-main">
+                            {user.firstName} {user.lastName}
+                          </div>
+                          <div className="text-xs text-flow-text-muted flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {user.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                          isAdmin
+                            ? "bg-purple-50 text-purple-700 border-purple-200"
+                            : "bg-slate-50 text-slate-600 border-slate-200"
+                        }`}
+                      >
+                        {isAdmin ? (
+                          <Shield className="h-3 w-3" />
+                        ) : (
+                          <UserIcon className="h-3 w-3" />
+                        )}
+                        {isAdmin ? "ADMIN" : "MEMBER"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-flow-text-muted">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default UsersPage;
