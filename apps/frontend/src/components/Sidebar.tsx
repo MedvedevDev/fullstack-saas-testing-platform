@@ -5,6 +5,7 @@ import {
   Users,
   Settings,
   LogOut,
+  KanbanSquare, // Import this new icon
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -20,10 +21,12 @@ const Sidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: FolderKanban, label: "Projects", path: "/projects" },
-    { icon: ListTodo, label: "Tasks", path: "/tasks" },
+    { icon: ListTodo, label: "Tasks List", path: "/tasks" }, // Renamed slightly for clarity
+    { icon: KanbanSquare, label: "Board View", path: "/tasks/board" }, // NEW ITEM
     { icon: Users, label: "Team", path: "/users" },
   ];
 
+  // ... rest of the component remains EXACTLY the same ...
   return (
     <aside className="w-64 bg-flow-indigo h-screen flex flex-col text-white sticky top-0">
       <div className="p-6 text-xl font-bold tracking-tight italic border-b border-white/10">
@@ -35,6 +38,7 @@ const Sidebar = () => {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.path === "/tasks"} // FIX: Only exact match for '/tasks' to avoid conflict with '/tasks/board'
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive

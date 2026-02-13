@@ -20,27 +20,26 @@ const taskSchema = z.object({
 // GET /api/tasks
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
-    const { status, priority, assigneeId, projectId, search } = req.query;
-
-    const where: any = {};
-    if (status) where.status = status;
-    if (priority) where.priority = priority;
-    if (assigneeId) where.assigneeId = assigneeId;
-    if (projectId) where.projectId = projectId;
-    if (search) {
-      where.title = { contains: search as string, mode: "insensitive" };
-    }
-
     const tasks = await prisma.task.findMany({
-      where,
+      where: {
+        OR: [
+          { assigneeId: req.user?.userId }, // Tasks assigned to me
+          { project: { ownerId: req.user?.userId } }, // Tasks in my projects
+        ],
+      },
       include: {
         project: { select: { name: true } },
-        assignee: { select: { firstName: true, lastName: true } },
-        tags: true,
+        // FIX: Include assignee details so we can show their initials
+        assignee: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
-
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch tasks" });

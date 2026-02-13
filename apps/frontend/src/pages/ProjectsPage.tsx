@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, Folder, MoreVertical } from "lucide-react";
+import { Link } from "react-router-dom"; // Import Link
 import api from "../api/axios";
 import CreateProjectModal from "../components/CreateProjectModal";
 import type { Project } from "../types/project";
@@ -75,14 +76,16 @@ const ProjectsPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <div
+            <Link
+              to={`/projects/${project.id}`}
               key={project.id}
-              className="bg-white border border-flow-border p-6 rounded-xl shadow-sm hover:shadow-md transition-all group"
+              className="bg-white border border-flow-border p-6 rounded-xl shadow-sm hover:shadow-md transition-all group block"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="bg-blue-50 p-2 rounded-lg group-hover:bg-flow-blue/10 transition-colors">
                   <Folder className="h-6 w-6 text-flow-blue" />
                 </div>
+                {/* Note: This button might need a preventDefault if you add click logic later */}
                 <button className="text-flow-text-muted hover:text-flow-text-main">
                   <MoreVertical className="h-5 w-5" />
                 </button>
@@ -101,7 +104,7 @@ const ProjectsPage = () => {
                   Created {new Date(project.createdAt).toLocaleDateString()}
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

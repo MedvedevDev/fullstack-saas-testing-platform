@@ -10,6 +10,8 @@ import TasksPage from "./pages/TasksPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
+import ProjectDetailsPage from "./pages/ProjectDetailsPage";
+import TasksKanbanPage from "./pages/TasksKanbanPage";
 
 function App() {
   return (
@@ -22,8 +24,10 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/tasks/board" element={<TasksKanbanPage />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/:id" element={<ProjectDetailsPage />} />
         </Route>
 
         {/* Redirect root to login */}

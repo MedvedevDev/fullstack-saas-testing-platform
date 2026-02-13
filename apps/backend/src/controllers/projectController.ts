@@ -1,12 +1,8 @@
 import { Response } from "express";
-// REMOVE: import { PrismaClient } from "@prisma/client";
-// ADD THIS IMPORT:
 import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { recordActivity } from "../utils/logger";
 import { z } from "zod";
-
-// REMOVE: const prisma = new PrismaClient(); <-- This line caused the error
 
 const projectSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -84,5 +80,33 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error("Delete failed", error);
     res.status(500).json({ error: "Failed to delete project" });
+  }
+};
+
+export const getProjectById = async (req: AuthRequest, res: Response) => {
+  try {
+    // FIX: Explicitly cast 'id' as a string to satisfy TypeScript/Prisma
+    const id = req.params.id as string;
+
+    // Optional: Safety check if you want to be extra safe
+    if (!id) return res.status(400).json({ error: "Project ID is required" });
+
+    const project = await prisma.project.findUnique({
+      where: { id },
+      include: {
+        tasks: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    res.json(project);
+  } catch (error) {
+    console.error("Get project error:", error);
+    res.status(500).json({ error: "Failed to fetch project details" });
   }
 };

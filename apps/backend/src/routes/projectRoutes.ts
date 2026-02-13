@@ -20,6 +20,9 @@ router.post(
 // Read: Any authenticated user (filtered by ownership in controller)
 router.get("/", projectController.getProjects);
 
+// Get particular project
+router.get("/:id", projectController.getProjectById);
+
 // Update: Admin or Manager
 router.put(
   "/:id",
