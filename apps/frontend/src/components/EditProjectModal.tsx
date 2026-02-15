@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, User as UserIcon } from "lucide-react";
 import api from "../api/axios";
 import type { Project } from "../types/project";
+import type { User } from "../types/user";
 
 interface EditProjectModalProps {
   project: Project;
@@ -17,8 +18,39 @@ const EditProjectModal = ({
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || "");
   const [status, setStatus] = useState(project.status);
+  const [ownerId, setOwnerId] = useState(project.ownerId || ""); // New State
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [users, setUsers] = useState<User[]>([]); // To populate dropdown
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // 1. Check if current user is Admin
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setIsAdmin(user.roles.some((r: any) => r.name === "ADMIN"));
+    }
+
+    // 2. Fetch potential owners (Admins & Managers)
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get("/users");
+        // Filter: Only Admins or Managers can own projects
+        const eligibleOwners = response.data.filter((u: User) =>
+          u.roles.some((r) => r.name === "ADMIN" || r.name === "MANAGER"),
+        );
+        setUsers(eligibleOwners);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+      }
+    };
+
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +62,7 @@ const EditProjectModal = ({
         name,
         description,
         status,
+        ownerId: isAdmin ? ownerId : undefined, // Only send if Admin
       });
       onRefresh();
       onClose();
@@ -73,6 +106,35 @@ const EditProjectModal = ({
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+
+          {/* Owner Reassignment (Admin Only) */}
+          {isAdmin && (
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                Project Owner
+              </label>
+              <div className="relative">
+                <UserIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <select
+                  className="w-full pl-9 p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
+                  value={ownerId}
+                  onChange={(e) => setOwnerId(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select Owner
+                  </option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.firstName} {u.lastName} ({u.roles[0]?.name})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1">
+                Only Admins and Managers can own projects.
+              </p>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">

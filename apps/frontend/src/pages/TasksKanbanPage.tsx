@@ -12,22 +12,22 @@ const TasksKanbanPage = () => {
   const columns = {
     TODO: {
       title: "To Do",
-      bg: "bg-gray-50/50",
+      bg: "bg-gray-50",
       border: "border-gray-200",
       icon: AlertCircle,
       iconColor: "text-slate-500",
     },
     IN_PROGRESS: {
       title: "In Progress",
-      bg: "bg-blue-50/50",
-      border: "border-blue-100",
+      bg: "bg-gray-50",
+      border: "border-gray-200",
       icon: Clock,
       iconColor: "text-blue-500",
     },
     DONE: {
       title: "Done",
-      bg: "bg-green-50/50",
-      border: "border-green-100",
+      bg: "bg-gray-50",
+      border: "border-gray-200",
       icon: CheckCircle2,
       iconColor: "text-green-500",
     },
@@ -172,7 +172,6 @@ const TasksKanbanPage = () => {
                                   ).toLocaleDateString()}
                                 </span>
 
-                                {/* FIX: Dynamic Avatar */}
                                 <div
                                   className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm ring-2 ring-white"
                                   style={{

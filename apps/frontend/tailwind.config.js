@@ -11,6 +11,7 @@ export default {
         "flow-border": "var(--color-flow-border)",
         "flow-text-main": "var(--color-flow-text-main)",
         "flow-text-muted": "var(--color-flow-text-muted)",
+        "flow-card": "var(--color-flow-card)",
       },
     },
   },

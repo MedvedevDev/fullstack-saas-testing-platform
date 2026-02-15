@@ -1,20 +1,41 @@
 @import "tailwindcss";
 
-@theme {
-  --color-flow-indigo: #2d336b; /* Sidebar / Header */
-  --color-flow-bg: #f8f9fc; /* Main Background */
-  --color-flow-blue: #2563eb; /* Primary Buttons */
-  --color-flow-border: #e2e8f0; /* Card/Input Borders */
-  --color-flow-text-main: #1e293b; /* Primary Headings */
-  --color-flow-text-muted: #64748b; /* Subtext */
+/* 1. Define the variables in standard CSS :root so the browser sees them */
+:root {
+  --color-flow-indigo: #2d336b;
+  --color-flow-bg: #f1f5f9; /* This is the "better" off-white color */
+  --color-flow-blue: #2563eb;
+  --color-flow-border: #e2e8f0;
+  --color-flow-text-main: #1e293b;
+  --color-flow-text-muted: #64748b;
 }
 
-/* Dark Theme Overrides */
-html.dark {
-  --color-flow-indigo: #1e224b; /* Darker sidebar/header */
-  --color-flow-bg: #0f172a; /* slate-900 for main background */
-  --color-flow-blue: #3b82f6; /* blue-500 for primary buttons */
-  --color-flow-border: #334155; /* slate-700 for borders */
-  --color-flow-text-main: #f1f5f9; /* slate-100 for primary headings */
-  --color-flow-text-muted: #94a3b8; /* slate-400 for subtext */
+
+
+/* 3. Link Tailwind to these variables */
+@theme {
+  --color-flow-indigo: var(--color-flow-indigo);
+  --color-flow-bg: var(--color-flow-bg);
+  --color-flow-blue: var(--color-flow-blue);
+  --color-flow-border: var(--color-flow-border);
+  --color-flow-text-main: var(--color-flow-text-main);
+  --color-flow-text-muted: var(--color-flow-text-muted);
+}
+
+/* 4. Global Reset - FORCE the background color */
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+body {
+  /* This ensures the background is #f8f9fc (off-white), not white */
+  background-color: var(--color-flow-bg);
+  color: var(--color-flow-text-main);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }

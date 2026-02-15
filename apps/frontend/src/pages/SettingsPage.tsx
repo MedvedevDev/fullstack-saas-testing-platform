@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Save, Lock, User, Loader2, Sun, Moon } from "lucide-react";
+import { Save, Lock, User, Loader2 } from "lucide-react";
 import api from "../api/axios";
-import { useTheme } from "../contexts/ThemeContext";
 
 const SettingsPage = () => {
-  const { theme, toggleTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -38,7 +36,6 @@ const SettingsPage = () => {
     setSuccessMsg("");
 
     try {
-      // Create payload: only include password if it's set
       const payload: any = {
         firstName: profile.firstName,
         lastName: profile.lastName,
@@ -60,7 +57,7 @@ const SettingsPage = () => {
 
       await api.put("/users/me", payload);
       setSuccessMsg("Profile updated successfully!");
-      setPasswords({ newPassword: "", confirmPassword: "" }); // Clear password fields
+      setPasswords({ newPassword: "", confirmPassword: "" });
     } catch (err) {
       console.error("Failed to update", err);
       alert("Failed to update profile.");
@@ -100,7 +97,7 @@ const SettingsPage = () => {
               </label>
               <input
                 required
-                className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
+                className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
                 value={profile.firstName}
                 onChange={(e) =>
                   setProfile({ ...profile, firstName: e.target.value })
@@ -113,7 +110,7 @@ const SettingsPage = () => {
               </label>
               <input
                 required
-                className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
+                className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
                 value={profile.lastName}
                 onChange={(e) =>
                   setProfile({ ...profile, lastName: e.target.value })
@@ -139,37 +136,6 @@ const SettingsPage = () => {
 
         <div className="border-t border-flow-border my-6"></div>
 
-        {/* Appearance Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <User className="h-5 w-5 text-flow-blue" />
-            <h3 className="font-bold text-flow-text-main">Appearance</h3>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border border-flow-border p-4">
-            <div>
-              <h4 className="font-semibold text-flow-text-main">
-                Interface Theme
-              </h4>
-              <p className="text-xs text-flow-text-muted">
-                Select or toggle your preferred interface theme.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="px-3 py-2 rounded-lg font-bold text-sm flex items-center gap-2 border border-flow-border hover:bg-gray-50 active:scale-95 transition-colors"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        <div className="border-t border-flow-border my-6"></div>
-
         {/* Password Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-4">
@@ -185,7 +151,7 @@ const SettingsPage = () => {
               <input
                 type="password"
                 placeholder="Leave blank to keep current"
-                className="w-full p-2.5 border border-flow-border rounded-lg text-sm focus:ring-2 focus:ring-flow-blue/20 outline-none"
+                className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
                 value={passwords.newPassword}
                 onChange={(e) =>
                   setPasswords({ ...passwords, newPassword: e.target.value })
@@ -199,7 +165,7 @@ const SettingsPage = () => {
               <input
                 type="password"
                 placeholder="Confirm new password"
-                className="w-full p-2.5 border border-flow-border rounded-lg text-sm focus:ring-2 focus:ring-flow-blue/20 outline-none"
+                className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
                 value={passwords.confirmPassword}
                 onChange={(e) =>
                   setPasswords({

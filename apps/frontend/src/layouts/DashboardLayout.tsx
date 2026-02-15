@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom"; // usage of useLocation triggers re-render on route change
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../api/axios";
 
@@ -8,7 +8,6 @@ const DashboardLayout = () => {
   const location = useLocation();
 
   // Fetch user data whenever the layout mounts or the route changes
-  // (This ensures the name updates if you navigate away from Settings)
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -19,17 +18,18 @@ const DashboardLayout = () => {
       }
     };
     fetchUser();
-  }, [location.pathname]); // Re-fetch when changing pages (e.g. leaving Settings)
+  }, [location.pathname]);
 
   return (
-    <div className="flex bg-gray-50 min-h-screen font-sans text-slate-900">
+    <div className="flex bg-flow-bg min-h-screen font-sans text-flow-text-main transition-colors duration-300">
       {/* Sidebar (Left) */}
       <Sidebar />
 
       {/* Main Content Area (Right) */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-flow-border flex items-center justify-between px-8 shrink-0">
+        {/* FIX 2: Changed 'bg-white' to 'bg-flow-card' so header turns dark too */}
+        <header className="h-16 bg-flow-card border-b border-flow-border flex items-center justify-between px-8 shrink-0 transition-colors duration-300">
           <h1 className="font-bold text-xl text-flow-text-main">
             Welcome Back
           </h1>

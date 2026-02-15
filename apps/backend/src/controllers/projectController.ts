@@ -8,6 +8,7 @@ const projectSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().optional(),
   status: z.enum(["ACTIVE", "ARCHIVED"]).optional(),
+  ownerId: z.string().uuid().optional(),
 });
 
 export const createProject = async (req: AuthRequest, res: Response) => {
@@ -26,7 +27,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
       req.user!.userId,
       "PROJECT_CREATED",
       "PROJECT",
-      project.id
+      project.id,
     );
     res.status(201).json(project);
   } catch (error) {
@@ -79,17 +80,44 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
     const validatedData = projectSchema.parse(req.body);
+    const userRoles = req.user?.roles || [];
+    const isAdmin = userRoles.includes("ADMIN");
+
+    // 1. Fetch current project
+    const currentProject = await prisma.project.findUnique({ where: { id } });
+    if (!currentProject)
+      return res.status(404).json({ error: "Project not found" });
+
+    // 2. Prepare update data
+    const updateData: any = {
+      name: validatedData.name,
+      description: validatedData.description,
+      status: validatedData.status,
+    };
+
+    // 3. Handle Owner Reassignment (Admin Only)
+    if (
+      validatedData.ownerId &&
+      validatedData.ownerId !== currentProject.ownerId
+    ) {
+      if (!isAdmin) {
+        return res
+          .status(403)
+          .json({ error: "Only Admins can reassign project ownership" });
+      }
+      updateData.ownerId = validatedData.ownerId;
+    }
 
     const project = await prisma.project.update({
       where: { id },
-      data: validatedData,
+      data: updateData,
     });
 
     await recordActivity(
       req.user!.userId,
       "PROJECT_UPDATED",
       "PROJECT",
-      project.id
+      project.id,
     );
     res.json(project);
   } catch (error) {

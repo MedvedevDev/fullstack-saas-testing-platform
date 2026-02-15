@@ -82,7 +82,7 @@ const DashboardPage = () => {
 
         {/* Feature Card (Only show for Admins/Managers to upsell or info) */}
         {!isViewer && (
-          <div className="bg-white border border-dashed border-flow-border rounded-xl p-8 flex flex-col items-center justify-center text-center">
+          <div className="bg-flow-card border border-dashed border-flow-border rounded-xl p-8 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-3xl">
               🚀
             </div>
