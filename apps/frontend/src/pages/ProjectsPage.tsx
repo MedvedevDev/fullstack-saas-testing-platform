@@ -6,11 +6,12 @@ import {
   Search,
   Edit2,
   Trash2,
+  Filter,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 import CreateProjectModal from "../components/CreateProjectModal";
-import EditProjectModal from "../components/EditProjectModal"; // Import the new modal
+import EditProjectModal from "../components/EditProjectModal";
 import type { Project } from "../types/project";
 import type { User } from "../types/user";
 
@@ -19,17 +20,17 @@ const ProjectsPage = () => {
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modals state
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Modals & State
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-
-  // Auth state
   const [canManage, setCanManage] = useState(false);
 
-  // Search state
+  // Filters & Search
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | "ACTIVE" | "ARCHIVED"
+  >("ALL");
 
-  // Dropdown state
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -37,14 +38,12 @@ const ProjectsPage = () => {
     const userStr = localStorage.getItem("user");
     if (userStr) {
       const user: User = JSON.parse(userStr);
-      const hasPermission = user.roles.some(
-        (r) => r.name === "ADMIN" || r.name === "MANAGER",
+      setCanManage(
+        user.roles.some((r) => r.name === "ADMIN" || r.name === "MANAGER"),
       );
-      setCanManage(hasPermission);
     }
     fetchProjects();
 
-    // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -61,12 +60,12 @@ const ProjectsPage = () => {
     setLoading(true);
     try {
       const response = await api.get("/projects");
+      // Default sort by created date (newest first)
       const sortedProjects = response.data.sort(
         (a: Project, b: Project) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
       setProjects(sortedProjects);
-      setFilteredProjects(sortedProjects);
     } catch (err) {
       console.error("Error fetching projects:", err);
     } finally {
@@ -74,28 +73,33 @@ const ProjectsPage = () => {
     }
   };
 
+  // Filter Logic Only (Search + Status)
   useEffect(() => {
+    let result = [...projects];
+
+    // 1. Search Filter
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();
-      setFilteredProjects(
-        projects.filter((p) => p.name.toLowerCase().includes(lower)),
-      );
-    } else {
-      setFilteredProjects(projects);
+      result = result.filter((p) => p.name.toLowerCase().includes(lower));
     }
-  }, [searchTerm, projects]);
+
+    // 2. Status Filter
+    if (statusFilter !== "ALL") {
+      result = result.filter((p) => p.status === statusFilter);
+    }
+
+    setFilteredProjects(result);
+  }, [searchTerm, statusFilter, projects]);
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.preventDefault(); // Prevent navigation to project details
+    e.preventDefault();
     e.stopPropagation();
-
     if (
       !window.confirm(
         "Are you sure? This will delete all tasks within this project.",
       )
     )
       return;
-
     try {
       await api.delete(`/projects/${id}`);
       fetchProjects();
@@ -120,45 +124,58 @@ const ProjectsPage = () => {
             Manage your workspaces and team goals
           </p>
         </div>
-
         {canManage && (
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-flow-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-sm active:scale-95"
           >
-            <Plus className="h-4 w-4" />
-            New Project
+            <Plus className="h-4 w-4" /> New Project
           </button>
         )}
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search projects..."
-          className="w-full sm:w-96 border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      {/* Toolbar: Search + Status Filter Only */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search projects..."
+            className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* Status Filter with Label */}
+        <div className="flex items-center gap-2 bg-white px-3 py-2 border border-gray-300 rounded-lg">
+          <Filter className="h-4 w-4 text-gray-500" />
+          <span className="text-sm font-bold text-gray-600 whitespace-nowrap">
+            Status:
+          </span>
+          <select
+            className="bg-transparent text-sm focus:outline-none text-gray-700 font-medium cursor-pointer w-full sm:w-auto"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+          >
+            <option value="ALL">All Projects</option>
+            <option value="ACTIVE">Active</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-pulse text-flow-text-muted font-medium">
-            Loading projects...
-          </div>
-        </div>
+        <div className="flex justify-center py-20">Loading...</div>
       ) : filteredProjects.length === 0 ? (
-        <div className="bg-white border border-dashed border-flow-border p-16 rounded-2xl text-center shadow-sm">
+        <div className="text-center p-16 border border-dashed border-gray-200 rounded-2xl">
           <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <Folder className="h-8 w-8 text-flow-text-muted" />
           </div>
-          <h3 className="text-lg font-bold text-flow-text-main">
-            No projects found
-          </h3>
-          <p className="text-flow-text-muted mb-8 max-w-xs mx-auto">
-            Try adjusting your search or create a new project.
+          <h3 className="text-lg font-bold text-gray-700">No projects found</h3>
+          <p className="text-flow-text-muted">
+            Try adjusting your filters or search.
           </p>
         </div>
       ) : (
@@ -173,17 +190,14 @@ const ProjectsPage = () => {
                   <div className="bg-blue-50 p-2 rounded-lg group-hover:bg-flow-blue/10 transition-colors">
                     <Folder className="h-6 w-6 text-flow-blue" />
                   </div>
-
                   {canManage && (
                     <div className="relative">
                       <button
                         onClick={(e) => toggleDropdown(e, project.id)}
-                        className="p-1 text-flow-text-muted hover:text-flow-text-main hover:bg-gray-100 rounded transition-colors"
+                        className="p-1 text-flow-text-muted hover:text-flow-text-main hover:bg-gray-100 rounded"
                       >
                         <MoreVertical className="h-5 w-5" />
                       </button>
-
-                      {/* Dropdown Menu */}
                       {activeDropdown === project.id && (
                         <div
                           ref={dropdownRef}
@@ -211,20 +225,15 @@ const ProjectsPage = () => {
                     </div>
                   )}
                 </div>
-
                 <h3 className="font-bold text-flow-text-main mb-1 truncate">
                   {project.name}
                 </h3>
                 <p className="text-sm text-flow-text-muted line-clamp-2 h-10 mb-4">
-                  {project.description || "No description provided."}
+                  {project.description}
                 </p>
                 <div className="flex justify-between items-center pt-4 border-t border-flow-border">
                   <span
-                    className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest ${
-                      project.status === "ARCHIVED"
-                        ? "bg-gray-100 text-gray-600"
-                        : "bg-green-50 text-green-600"
-                    }`}
+                    className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${project.status === "ARCHIVED" ? "bg-gray-100 text-gray-600" : "bg-green-50 text-green-600"}`}
                   >
                     {project.status || "ACTIVE"}
                   </span>
@@ -238,13 +247,12 @@ const ProjectsPage = () => {
         </div>
       )}
 
-      {isCreateModalOpen && (
+      {isModalOpen && (
         <CreateProjectModal
-          onClose={() => setIsCreateModalOpen(false)}
+          onClose={() => setIsModalOpen(false)}
           onRefresh={fetchProjects}
         />
       )}
-
       {editingProject && (
         <EditProjectModal
           project={editingProject}

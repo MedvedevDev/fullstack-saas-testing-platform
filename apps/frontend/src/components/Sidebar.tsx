@@ -41,7 +41,7 @@ const Sidebar = () => {
   return (
     <aside className="w-64 bg-flow-indigo h-screen flex flex-col text-white sticky top-0">
       <div className="p-6 text-xl font-bold tracking-tight italic border-b border-white/10">
-        flowdash
+        SaaS Testing
       </div>
 
       <nav className="flex-1 p-4 space-y-2">
