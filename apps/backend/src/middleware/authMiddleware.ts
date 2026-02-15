@@ -45,3 +45,27 @@ export const authorizeRoles = (...allowedRoles: string[]) => {
     next();
   };
 };
+
+// Centralized RBAC Middleware
+export const checkPermission = (permission: string) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    const userPermissions = req.user?.roles || [];
+
+    // Example: Map roles to permissions
+    const rolePermissions: Record<string, string[]> = {
+      ADMIN: ["create", "read", "update", "delete"],
+      MANAGER: ["read", "update"],
+      VIEWER: ["read"],
+    };
+
+    const hasPermission = userPermissions.some((role) =>
+      rolePermissions[role]?.includes(permission),
+    );
+
+    if (!hasPermission) {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    next();
+  };
+};

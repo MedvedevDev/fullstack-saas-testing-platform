@@ -1,46 +1,46 @@
 import { Router, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
-// Import authenticateToken here
-import {
-  AuthRequest,
-  authenticateToken,
-  authorizeRoles,
-} from "../middleware/authMiddleware";
-import * as dotenv from "dotenv";
-
-dotenv.config();
+import { prisma } from "../lib/prisma";
+import { AuthRequest, authenticateToken } from "../middleware/authMiddleware";
 
 const router = Router();
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
-// ADD THIS: Global protection for logs
+// Global protection for logs
 router.use(authenticateToken);
 
 // GET /api/logs
-router.get(
-  "/",
-  authorizeRoles("ADMIN", "MANAGER"),
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const logs = await prisma.activityLog.findMany({
-        include: {
-          user: {
-            select: { firstName: true, lastName: true, email: true },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      });
+// FIX: Removed strict authorizeRoles("ADMIN", "MANAGER") wrapper
+// We now handle permission logic inside the route
+router.get("/", async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const roles = req.user?.roles || [];
 
-      res.json(logs);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch logs" });
+    // Check if user is strictly a Viewer (not Admin/Manager)
+    const isViewer = !roles.includes("ADMIN") && !roles.includes("MANAGER");
+
+    let whereClause = {};
+
+    if (isViewer) {
+      // FIX: Viewers only see their OWN activity logs.
+      // (Since schema doesn't link logs to projects, this is the safest filter)
+      whereClause = { userId: userId };
     }
-  },
-);
+
+    const logs = await prisma.activityLog.findMany({
+      where: whereClause,
+      include: {
+        user: {
+          select: { firstName: true, lastName: true, email: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
+
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch logs" });
+  }
+});
 
 export default router;

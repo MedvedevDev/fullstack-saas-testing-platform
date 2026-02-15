@@ -1,8 +1,6 @@
 import { Router } from "express";
-import {
-  authenticateToken,
-  authorizeRoles,
-} from "../middleware/authMiddleware";
+import { authenticateToken } from "../middleware/authMiddleware";
+import { requirePermission } from "../middleware/rbacMiddleware";
 import * as projectController from "../controllers/projectController";
 
 const router = Router();
@@ -13,24 +11,36 @@ router.use(authenticateToken);
 // Create: Admin or Manager
 router.post(
   "/",
-  authorizeRoles("ADMIN", "MANAGER"),
+  requirePermission("write:projects"),
   projectController.createProject,
 );
 
 // Read: Any authenticated user (filtered by ownership in controller)
-router.get("/", projectController.getProjects);
+router.get(
+  "/",
+  requirePermission("read:projects"),
+  projectController.getProjects,
+);
 
 // Get particular project
-router.get("/:id", projectController.getProjectById);
+router.get(
+  "/:id",
+  requirePermission("read:projects"),
+  projectController.getProjectById,
+);
 
 // Update: Admin or Manager
 router.put(
   "/:id",
-  authorizeRoles("ADMIN", "MANAGER"),
+  requirePermission("write:projects"),
   projectController.updateProject,
 );
 
 // Delete: Admin only
-router.delete("/:id", authorizeRoles("ADMIN"), projectController.deleteProject);
+router.delete(
+  "/:id",
+  requirePermission("delete:projects"),
+  projectController.deleteProject,
+);
 
 export default router;

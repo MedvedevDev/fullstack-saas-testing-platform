@@ -12,6 +12,7 @@ import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import TasksKanbanPage from "./pages/TasksKanbanPage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/users" element={<UsersPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/:id" element={<ProjectDetailsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
         {/* Redirect root to login */}

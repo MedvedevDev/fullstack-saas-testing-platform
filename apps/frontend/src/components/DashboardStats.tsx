@@ -1,5 +1,13 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Layers, CheckCircle2, Users } from "lucide-react";
+import { Layers, CheckCircle2, Users, Briefcase } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as BarTooltip,
+} from "recharts";
 
 interface StatsProps {
   stats: {
@@ -11,9 +19,10 @@ interface StatsProps {
       DONE: number;
     };
   };
+  isViewer?: boolean; // Add optional prop
 }
 
-const DashboardStats = ({ stats }: StatsProps) => {
+const DashboardStats = ({ stats, isViewer = false }: StatsProps) => {
   const data = [
     { name: "To Do", value: stats.tasksByStatus.TODO || 0, color: "#94a3b8" },
     {
@@ -34,61 +43,68 @@ const DashboardStats = ({ stats }: StatsProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       {/* Metric Cards Column */}
-      <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Active Projects */}
-        <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between">
+      <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Card 1: Projects */}
+        <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-indigo-50 rounded-lg">
               <Layers className="h-6 w-6 text-indigo-600" />
             </div>
-            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
-              +12%
-            </span>
           </div>
           <div>
             <h3 className="text-3xl font-bold text-flow-text-main mt-4">
               {stats.totalProjects}
             </h3>
-            <p className="text-sm text-flow-text-muted">Active Projects</p>
+            <p className="text-sm text-flow-text-muted font-medium">
+              {isViewer ? "My Active Projects" : "Total Active Projects"}
+            </p>
           </div>
         </div>
 
-        {/* Total Tasks */}
-        <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between">
+        {/* Card 2: Tasks */}
+        <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-blue-50 rounded-lg">
-              <CheckCircle2 className="h-6 w-6 text-blue-600" />
+              <Briefcase className="h-6 w-6 text-blue-600" />
             </div>
           </div>
           <div>
             <h3 className="text-3xl font-bold text-flow-text-main mt-4">
               {totalTasks}
             </h3>
-            <p className="text-sm text-flow-text-muted">Total Tasks</p>
+            <p className="text-sm text-flow-text-muted font-medium">
+              {isViewer ? "My Total Tasks" : "Total Tasks"}
+            </p>
           </div>
         </div>
 
-        {/* Team Members */}
-        <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <div className="p-2 bg-orange-50 rounded-lg">
-              <Users className="h-6 w-6 text-orange-600" />
+        {/* Card 3: Team Members (HIDDEN FOR VIEWERS) */}
+        {!isViewer && (
+          <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow sm:col-span-2">
+            <div className="flex justify-between items-start">
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <Users className="h-6 w-6 text-orange-600" />
+              </div>
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold text-flow-text-main mt-4">
+                {stats.totalUsers}
+              </h3>
+              <p className="text-sm text-flow-text-muted font-medium">
+                Team Members
+              </p>
             </div>
           </div>
-          <div>
-            <h3 className="text-3xl font-bold text-flow-text-main mt-4">
-              {stats.totalUsers}
-            </h3>
-            <p className="text-sm text-flow-text-muted">Team Members</p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Chart Card */}
       <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col h-full">
-        <h3 className="font-bold text-flow-text-main mb-4">Task Completion</h3>
+        <h3 className="font-bold text-flow-text-main mb-4">
+          {isViewer ? "My Task Completion" : "Overall Task Completion"}
+        </h3>
 
-        <div className="flex-1 min-h-[220px] relative">
+        <div className="flex-1 min-h-[200px] relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -117,7 +133,6 @@ const DashboardStats = ({ stats }: StatsProps) => {
                   fontWeight: "bold",
                   color: "#1e293b",
                 }}
-                // FIX: Use 'any' for the argument to bypass strict union type mismatch
                 formatter={(value: any) => [`${value} Tasks`, "Count"]}
               />
             </PieChart>
@@ -153,4 +168,4 @@ const DashboardStats = ({ stats }: StatsProps) => {
   );
 };
 
-export default DashboardStats;
+export { DashboardStats };

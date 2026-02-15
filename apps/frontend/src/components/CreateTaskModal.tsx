@@ -6,9 +6,14 @@ import type { Project } from "../types/project";
 interface CreateTaskModalProps {
   onClose: () => void;
   onRefresh: () => void;
+  projectId?: string; // Make projectId optional
 }
 
-const CreateTaskModal = ({ onClose, onRefresh }: CreateTaskModalProps) => {
+const CreateTaskModal = ({
+  onClose,
+  onRefresh,
+  projectId,
+}: CreateTaskModalProps) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -16,23 +21,27 @@ const CreateTaskModal = ({ onClose, onRefresh }: CreateTaskModalProps) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    projectId: "",
+    projectId: projectId || "", // Pre-fill if provided
     priority: "MEDIUM",
     dueDate: "",
   });
 
-  // Fetch projects to populate the dropdown
+  // Fetch projects only if no projectId is provided
   useEffect(() => {
-    api
-      .get("/projects")
-      .then((res) => {
-        setProjects(res.data);
-        if (res.data.length > 0) {
-          setFormData((prev) => ({ ...prev, projectId: res.data[0].id }));
-        }
-      })
-      .finally(() => setLoadingProjects(false));
-  }, []);
+    if (!projectId) {
+      api
+        .get("/projects")
+        .then((res) => {
+          setProjects(res.data);
+          if (res.data.length > 0) {
+            setFormData((prev) => ({ ...prev, projectId: res.data[0].id }));
+          }
+        })
+        .finally(() => setLoadingProjects(false));
+    } else {
+      setLoadingProjects(false);
+    }
+  }, [projectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,16 +87,23 @@ const CreateTaskModal = ({ onClose, onRefresh }: CreateTaskModalProps) => {
               onChange={(e) =>
                 setFormData({ ...formData, projectId: e.target.value })
               }
-              disabled={loadingProjects}
+              disabled={loadingProjects || !!projectId} // Disable if projectId is provided
             >
-              {loadingProjects ? (
+              {loadingProjects && !projectId ? (
                 <option>Loading projects...</option>
-              ) : (
+              ) : !projectId ? (
                 projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
                 ))
+              ) : (
+                <option value={formData.projectId}>
+                  {
+                    projects.find((p) => p.id === formData.projectId)?.name ||
+                    "Selected Project"
+                  }
+                </option>
               )}
             </select>
           </div>

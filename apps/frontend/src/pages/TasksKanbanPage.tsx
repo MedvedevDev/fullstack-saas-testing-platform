@@ -71,7 +71,6 @@ const TasksKanbanPage = () => {
 
     try {
       await api.put(`/tasks/${draggableId}`, {
-        ...movedTask,
         status: destination.droppableId,
       });
     } catch (err) {

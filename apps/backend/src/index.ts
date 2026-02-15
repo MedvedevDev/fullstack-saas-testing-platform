@@ -10,6 +10,7 @@ import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import userRoutes from "./routes/userRoutes";
 import tagRoutes from "./routes/tagRoutes";
+import commentRoutes from "./routes/commentRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
 
 // Import Middleware
@@ -37,6 +38,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tags", tagRoutes);
+app.use("/api/comments", commentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 // *CRITICAL*: Ensure logRoutes has auth inside it (see step 2 below)

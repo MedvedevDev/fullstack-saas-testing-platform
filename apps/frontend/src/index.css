@@ -8,3 +8,13 @@
   --color-flow-text-main: #1e293b; /* Primary Headings */
   --color-flow-text-muted: #64748b; /* Subtext */
 }
+
+/* Dark Theme Overrides */
+html.dark {
+  --color-flow-indigo: #1e224b; /* Darker sidebar/header */
+  --color-flow-bg: #0f172a; /* slate-900 for main background */
+  --color-flow-blue: #3b82f6; /* blue-500 for primary buttons */
+  --color-flow-border: #334155; /* slate-700 for borders */
+  --color-flow-text-main: #f1f5f9; /* slate-100 for primary headings */
+  --color-flow-text-muted: #94a3b8; /* slate-400 for subtext */
+}

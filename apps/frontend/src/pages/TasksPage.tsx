@@ -1,30 +1,38 @@
 import { useState, useEffect } from "react";
 import {
   Plus,
-  MoreVertical,
   CheckCircle2,
   Clock,
   AlertCircle,
   Calendar,
   Pencil,
   Trash2,
+  Search,
 } from "lucide-react";
 import api from "../api/axios";
 import CreateTaskModal from "../components/CreateTaskModal";
 import EditTaskModal from "../components/EditTaskModal";
 import type { Task } from "../types/task";
+import type { User } from "../types/user";
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  // Search and Filter States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const fetchTasks = async () => {
     setLoading(true);
     try {
       const response = await api.get("/tasks");
       setTasks(response.data);
+      setFilteredTasks(response.data); // Initialize filtered list
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -33,8 +41,46 @@ const TasksPage = () => {
   };
 
   useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr));
+    }
     fetchTasks();
   }, []);
+
+  // Unified Filter Logic (Global Requirement #5)
+  useEffect(() => {
+    let result = tasks;
+
+    // 1. Search Filter (Name, Project, Assignee)
+    if (searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase();
+      result = result.filter((task) => {
+        const titleMatch = task.title.toLowerCase().includes(lowerTerm);
+        const projectMatch = task.project?.name
+          .toLowerCase()
+          .includes(lowerTerm);
+        const assigneeMatch = task.assignee
+          ? `${task.assignee.firstName} ${task.assignee.lastName}`
+              .toLowerCase()
+              .includes(lowerTerm)
+          : false;
+
+        return titleMatch || projectMatch || assigneeMatch;
+      });
+    }
+
+    // 2. Status Filter
+    if (statusFilter) {
+      result = result.filter((task) => task.status === statusFilter);
+    }
+
+    setFilteredTasks(result);
+  }, [searchTerm, statusFilter, tasks]);
+
+  const canManage = currentUser?.roles.some(
+    (r) => r.name === "ADMIN" || r.name === "MANAGER",
+  );
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this task?")) return;
@@ -74,13 +120,41 @@ const TasksPage = () => {
             Tracking all activities and deadlines
           </p>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 bg-flow-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-sm active:scale-95"
+
+        {canManage && (
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 bg-flow-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-sm active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            Create Task
+          </button>
+        )}
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by task, project, or assignee..."
+            className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <select
+          className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
         >
-          <Plus className="h-4 w-4" />
-          Create Task
-        </button>
+          <option value="">All Statuses</option>
+          <option value="TODO">To Do</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="DONE">Done</option>
+        </select>
       </div>
 
       <div className="bg-white border border-flow-border rounded-xl overflow-hidden shadow-sm">
@@ -90,7 +164,6 @@ const TasksPage = () => {
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-flow-text-muted">
                 Task Details
               </th>
-              {/* FIX: Added whitespace-nowrap to headers as well for consistency */}
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-flow-text-muted whitespace-nowrap">
                 Status
               </th>
@@ -103,9 +176,11 @@ const TasksPage = () => {
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-flow-text-muted whitespace-nowrap">
                 Created
               </th>
-              <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-flow-text-muted">
-                Actions
-              </th>
+              {canManage && (
+                <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-flow-text-muted">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-flow-border">
@@ -118,17 +193,17 @@ const TasksPage = () => {
                   Loading tasks...
                 </td>
               </tr>
-            ) : tasks.length === 0 ? (
+            ) : filteredTasks.length === 0 ? (
               <tr>
                 <td
                   colSpan={6}
                   className="px-6 py-10 text-center text-flow-text-muted"
                 >
-                  No tasks found.
+                  No tasks found matching your search.
                 </td>
               </tr>
             ) : (
-              tasks.map((task) => (
+              filteredTasks.map((task) => (
                 <tr
                   key={task.id}
                   className="hover:bg-gray-50 transition-colors group"
@@ -141,10 +216,14 @@ const TasksPage = () => {
                       <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 uppercase tracking-wide whitespace-nowrap">
                         {task.project?.name || "No Project"}
                       </span>
+                      {task.assignee && (
+                        <span className="text-[10px] font-bold text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 uppercase tracking-wide whitespace-nowrap">
+                          {task.assignee.firstName} {task.assignee.lastName}
+                        </span>
+                      )}
                     </div>
                   </td>
 
-                  {/* FIX: Added whitespace-nowrap to prevent "IN PROGRESS" from wrapping */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-flow-text-main uppercase">
                       {getStatusIcon(task.status)}
@@ -166,7 +245,6 @@ const TasksPage = () => {
                     </span>
                   </td>
 
-                  {/* FIX: Added whitespace-nowrap to prevent "No date" from wrapping */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2 text-sm text-flow-text-muted">
                       <Calendar className="h-3.5 w-3.5" />
@@ -178,24 +256,26 @@ const TasksPage = () => {
                     {formatDate(task.createdAt)}
                   </td>
 
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => setEditingTask(task)}
-                        className="p-1.5 text-gray-400 hover:text-flow-blue hover:bg-blue-50 rounded transition-colors"
-                        title="Edit Task"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(task.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                        title="Delete Task"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
+                  {canManage && (
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => setEditingTask(task)}
+                          className="p-1.5 text-gray-400 hover:text-flow-blue hover:bg-blue-50 rounded transition-colors"
+                          title="Edit Task"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(task.id)}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                          title="Delete Task"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

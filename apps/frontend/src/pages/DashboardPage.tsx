@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import api from "../api/axios";
-import DashboardStats from "../components/DashboardStats";
+import { DashboardStats } from "../components/DashboardStats"; // Ensure named import
 import RecentActivity from "../components/RecentActivity";
+import type { User } from "../types/user";
 
 const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
@@ -13,8 +14,16 @@ const DashboardPage = () => {
     },
     logs: [],
   });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // 1. Get User Role
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr));
+    }
+
+    // 2. Fetch Data
     const fetchData = async () => {
       try {
         const [statsRes, logsRes] = await Promise.all([
@@ -49,6 +58,9 @@ const DashboardPage = () => {
     );
   }
 
+  // Determine if Viewer
+  const isViewer = currentUser?.roles.some((r) => r.name === "VIEWER");
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
@@ -56,27 +68,30 @@ const DashboardPage = () => {
           Dashboard Overview
         </h2>
         <p className="text-sm text-flow-text-muted">
-          Welcome back! Here's what's happening today.
+          {isViewer
+            ? "Here is an overview of your assigned work."
+            : "Welcome back! Here's what's happening today."}
         </p>
       </div>
 
-      <DashboardStats stats={data.stats} />
+      {/* Pass the role to the Stats component */}
+      <DashboardStats stats={data.stats} isViewer={!!isViewer} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecentActivity logs={data.logs} />
 
-        {/* Placeholder for future widget (e.g., Upcoming Deadlines) */}
-        <div className="bg-white border border-dashed border-flow-border rounded-xl p-8 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-3xl">
-            🚀
+        {/* Feature Card (Only show for Admins/Managers to upsell or info) */}
+        {!isViewer && (
+          <div className="bg-white border border-dashed border-flow-border rounded-xl p-8 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-3xl">
+              🚀
+            </div>
+            <h3 className="font-bold text-flow-text-main">System Status</h3>
+            <p className="text-sm text-flow-text-muted max-w-xs mt-2">
+              All systems operational. Database connected securely.
+            </p>
           </div>
-          <h3 className="font-bold text-flow-text-main">
-            Pro Feature Unlocked
-          </h3>
-          <p className="text-sm text-flow-text-muted max-w-xs mt-2">
-            Your dashboard is now fully connected to your live database.
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );

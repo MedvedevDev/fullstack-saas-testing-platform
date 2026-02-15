@@ -12,27 +12,46 @@ const prisma = new PrismaClient({ adapter });
 // GET /api/dashboard/stats - Get aggregated stats for the dashboard
 router.get("/stats", authenticateToken, async (req: AuthRequest, res) => {
   try {
-    // Run multiple aggregations in parallel for better performance
-    const [taskStats, projectCount, userCount] = await Promise.all([
+    const userId = req.user?.userId;
+    const roles = req.user?.roles || [];
+    const isAdminOrManager =
+      roles.includes("ADMIN") || roles.includes("MANAGER");
+
+    // Filter: Viewers only see their own tasks
+    const taskFilter = isAdminOrManager ? {} : { assigneeId: userId };
+
+    const [taskStats, projectCount, userCount, totalTasks] = await Promise.all([
       prisma.task.groupBy({
         by: ["status"],
         _count: { _all: true },
+        where: taskFilter,
       }),
-      prisma.project.count(),
+      prisma.project.count({
+        where: isAdminOrManager
+          ? {}
+          : { tasks: { some: { assigneeId: userId } } },
+      }),
       prisma.user.count(),
+      prisma.task.count({ where: taskFilter }),
     ]);
 
-    // Format the stats for the frontend charts
-    const stats = {
+    // Calculate DONE percentage safely
+    const doneCount =
+      taskStats.find((s) => s.status === "DONE")?._count._all || 0;
+    const completionRate =
+      totalTasks > 0 ? Math.round((doneCount / totalTasks) * 100) : 0;
+
+    res.json({
       totalProjects: projectCount,
       totalUsers: userCount,
-      tasksByStatus: taskStats.reduce((acc: any, curr) => {
-        acc[curr.status] = curr._count._all;
-        return acc;
-      }, {}),
-    };
-
-    res.json(stats);
+      completionRate: completionRate, // FIX: This stops the NaN%
+      tasksByStatus: {
+        TODO: taskStats.find((s) => s.status === "TODO")?._count._all || 0,
+        IN_PROGRESS:
+          taskStats.find((s) => s.status === "IN_PROGRESS")?._count._all || 0,
+        DONE: doneCount,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }

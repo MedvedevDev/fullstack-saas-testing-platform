@@ -11,6 +11,12 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isAdmin = user?.roles?.some((r: any) => r.name === "ADMIN");
+  const isAdminOrManager = user?.roles?.some(
+    (r: any) => r.name === "ADMIN" || r.name === "MANAGER",
+  );
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -24,6 +30,11 @@ const Sidebar = () => {
     { icon: ListTodo, label: "Tasks List", path: "/tasks" }, // Renamed slightly for clarity
     { icon: KanbanSquare, label: "Board View", path: "/tasks/board" }, // NEW ITEM
     { icon: Users, label: "Team", path: "/users" },
+    ...(isAdminOrManager
+      ? [{ icon: Users, label: "Team", path: "/users" }]
+      : []),
+    ...(isAdmin ? [{ icon: Users, label: "Team", path: "/users" }] : []),
+    { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
   // ... rest of the component remains EXACTLY the same ...

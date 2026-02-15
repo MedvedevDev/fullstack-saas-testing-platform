@@ -22,7 +22,12 @@ export const createProject = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    await recordActivity(req.user!.userId, `PROJECT_CREATED: ${project.name}`);
+    await recordActivity(
+      req.user!.userId,
+      "PROJECT_CREATED",
+      "PROJECT",
+      project.id
+    );
     res.status(201).json(project);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -34,11 +39,38 @@ export const createProject = async (req: AuthRequest, res: Response) => {
 
 export const getProjects = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = req.user?.userId;
+    const roles = req.user?.roles || [];
+
+    // Check if user is Admin or Manager
+    const canViewAll = roles.includes("ADMIN") || roles.includes("MANAGER");
+
+    let whereClause: any = {};
+
+    if (!canViewAll) {
+      // STRICT FILTER: Viewers only see projects where they have a task assigned.
+      whereClause = {
+        tasks: {
+          some: {
+            assigneeId: userId,
+          },
+        },
+      };
+    }
+
     const projects = await prisma.project.findMany({
-      where: { ownerId: req.user!.userId },
+      where: whereClause,
+      include: {
+        _count: {
+          select: { tasks: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
     });
+
     res.json(projects);
   } catch (error) {
+    console.error("Get projects error:", error);
     res.status(500).json({ error: "Failed to fetch projects" });
   }
 };
@@ -53,7 +85,12 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
       data: validatedData,
     });
 
-    await recordActivity(req.user!.userId, `PROJECT_UPDATED: ${project.name}`);
+    await recordActivity(
+      req.user!.userId,
+      "PROJECT_UPDATED",
+      "PROJECT",
+      project.id
+    );
     res.json(project);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -75,7 +112,7 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
       prisma.project.delete({ where: { id } }),
     ]);
 
-    await recordActivity(req.user!.userId, `PROJECT_DELETED: ${project.name}`);
+    await recordActivity(req.user!.userId, "PROJECT_DELETED", "PROJECT", id);
     res.status(204).send();
   } catch (error) {
     console.error("Delete failed", error);
@@ -85,23 +122,47 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
 
 export const getProjectById = async (req: AuthRequest, res: Response) => {
   try {
-    // FIX: Explicitly cast 'id' as a string to satisfy TypeScript/Prisma
     const id = req.params.id as string;
+    const user = req.user!;
 
-    // Optional: Safety check if you want to be extra safe
-    if (!id) return res.status(400).json({ error: "Project ID is required" });
+    if (!id) {
+      return res.status(400).json({ error: "Project ID is required" });
+    }
 
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
         tasks: {
           orderBy: { createdAt: "desc" },
+          include: {
+            assignee: {
+              select: { id: true, firstName: true, lastName: true },
+            },
+          },
         },
       },
     });
 
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
+    }
+
+    // Authorization Check
+    const isManagerOrAdmin =
+      user.roles.includes("ADMIN") || user.roles.includes("MANAGER");
+
+    if (!isManagerOrAdmin) {
+      const isAssignedToProject = await prisma.task.count({
+        where: {
+          projectId: id,
+          assigneeId: user.userId,
+        },
+      });
+
+      if (isAssignedToProject === 0) {
+        // Return 404 to prevent leaking that the project exists
+        return res.status(404).json({ error: "Project not found" });
+      }
     }
 
     res.json(project);

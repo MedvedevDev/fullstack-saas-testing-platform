@@ -1,28 +1,58 @@
-import { Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom"; // usage of useLocation triggers re-render on route change
 import Sidebar from "../components/Sidebar";
+import api from "../api/axios";
 
 const DashboardLayout = () => {
+  const [user, setUser] = useState({ firstName: "", lastName: "" });
+  const location = useLocation();
+
+  // Fetch user data whenever the layout mounts or the route changes
+  // (This ensures the name updates if you navigate away from Settings)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get("/users/me");
+        setUser(response.data);
+      } catch (err) {
+        console.error("Failed to fetch user profile", err);
+      }
+    };
+    fetchUser();
+  }, [location.pathname]); // Re-fetch when changing pages (e.g. leaving Settings)
+
   return (
-    <div className="flex bg-flow-bg min-h-screen">
+    <div className="flex bg-gray-50 min-h-screen font-sans text-slate-900">
+      {/* Sidebar (Left) */}
       <Sidebar />
-      <main className="flex-1 flex flex-col">
+
+      {/* Main Content Area (Right) */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-flow-border flex items-center justify-between px-8">
-          <h1 className="text-lg font-semibold text-flow-text-main">
+        <header className="h-16 bg-white border-b border-flow-border flex items-center justify-between px-8 shrink-0">
+          <h1 className="font-bold text-xl text-flow-text-main">
             Welcome Back
           </h1>
+
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-flow-blue flex items-center justify-center text-white text-xs font-bold">
-              JD
+            {/* Dynamic Avatar */}
+            <div className="w-9 h-9 rounded-full bg-flow-blue text-white flex items-center justify-center text-xs font-bold shadow-sm">
+              {user.firstName
+                ? `${user.firstName[0]}${user.lastName[0]}`
+                : "..."}
             </div>
+
+            {/* Dynamic Name */}
             <span className="text-sm font-medium text-flow-text-main">
-              John Doe
+              {user.firstName
+                ? `${user.firstName} ${user.lastName}`
+                : "Loading..."}
             </span>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-8">
+        <div className="flex-1 overflow-y-auto p-8">
           <Outlet />
         </div>
       </main>

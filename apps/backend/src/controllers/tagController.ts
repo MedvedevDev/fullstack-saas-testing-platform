@@ -30,7 +30,7 @@ export const createTag = async (req: AuthRequest, res: Response) => {
 
     const tag = await prisma.tag.create({ data: validatedData });
 
-    await recordActivity(req.user!.userId, `TAG_CREATED: ${tag.name}`);
+    await recordActivity(req.user!.userId, "TAG_CREATED", "TAG", tag.id);
     res.status(201).json(tag);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -51,7 +51,7 @@ export const updateTag = async (req: AuthRequest, res: Response) => {
       data: validatedData,
     });
 
-    await recordActivity(req.user!.userId, `TAG_UPDATED: ${tag.name}`);
+    await recordActivity(req.user!.userId, "TAG_UPDATED", "TAG", tag.id);
     res.json(tag);
   } catch (error) {
     res.status(400).json({ error: "Update failed" });
@@ -64,7 +64,7 @@ export const deleteTag = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string;
     await prisma.tag.delete({ where: { id } });
 
-    await recordActivity(req.user!.userId, `TAG_DELETED: ${id}`);
+    await recordActivity(req.user!.userId, "TAG_DELETED", "TAG", id);
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: "Failed to delete tag" });

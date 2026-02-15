@@ -4,7 +4,6 @@ import {
   Shield,
   Trash2,
   User as UserIcon,
-  Calendar,
   Search,
   AlertTriangle,
 } from "lucide-react";
@@ -16,6 +15,7 @@ const UsersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentUserRole, setCurrentUserRole] = useState<string>("");
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -25,10 +25,9 @@ const UsersPage = () => {
       setError("");
     } catch (err: any) {
       console.error("Failed to fetch users", err);
-      // Detailed error handling
       if (err.response?.status === 403) {
         setError(
-          "Access Denied: You need ADMIN permissions to view this list.",
+          "Access Denied: You need ADMIN or MANAGER permissions to view this list.",
         );
       } else {
         setError("Failed to load team members. Please check backend logs.");
@@ -39,7 +38,21 @@ const UsersPage = () => {
   };
 
   useEffect(() => {
+    // 1. Fetch Users
     fetchUsers();
+
+    // 2. Get Current User Role for UI Logic
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        // Assuming roles is an array of objects like [{ name: "ADMIN" }]
+        const roleName = user.roles?.[0]?.name || "";
+        setCurrentUserRole(roleName);
+      } catch (e) {
+        console.error("Error parsing user from local storage", e);
+      }
+    }
   }, []);
 
   const handleDelete = async (userId: string) => {
@@ -52,7 +65,6 @@ const UsersPage = () => {
       alert("User deleted successfully.");
     } catch (err: any) {
       console.error("Delete error:", err);
-      // Show the specific error message from the backend (e.g., "Cannot delete user...")
       const message = err.response?.data?.error || "Failed to delete user.";
       alert(message);
     }
@@ -180,12 +192,16 @@ const UsersPage = () => {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {/* ONLY SHOW DELETE IF CURRENT USER IS ADMIN */}
+                      {currentUserRole === "ADMIN" && (
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          title="Delete User"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

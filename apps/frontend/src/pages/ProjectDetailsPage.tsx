@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import api from "../api/axios";
 import type { Task } from "../types/task";
+import CreateTaskModal from "../components/CreateTaskModal";
+import type { User } from "../types/user";
 
 // Define a local type that includes tasks
 interface ProjectDetails {
@@ -26,8 +28,21 @@ const ProjectDetailsPage = () => {
   const navigate = useNavigate();
   const [project, setProject] = useState<ProjectDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [canManage, setCanManage] = useState(false);
 
   useEffect(() => {
+    // 1. Check Permissions
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      const user: User = JSON.parse(userStr);
+      // Check if user is Admin or Manager
+      const hasPermission = user.roles.some(
+        (r) => r.name === "ADMIN" || r.name === "MANAGER",
+      );
+      setCanManage(hasPermission);
+    }
+
     const fetchProject = async () => {
       try {
         const response = await api.get(`/projects/${id}`);
@@ -41,6 +56,15 @@ const ProjectDetailsPage = () => {
     };
     fetchProject();
   }, [id, navigate]);
+
+  const fetchProject = async () => {
+    try {
+      const response = await api.get(`/projects/${id}`);
+      setProject(response.data);
+    } catch (err) {
+      console.error("Failed to fetch project", err);
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -112,7 +136,17 @@ const ProjectDetailsPage = () => {
           <h3 className="font-bold text-flow-text-main">
             Project Tasks ({project.tasks.length})
           </h3>
-          {/* Future: Add "Create Task" button that auto-selects this project */}
+
+          {/* FIX: Only show Create button if user is Admin or Manager */}
+          {canManage && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center gap-2 bg-flow-blue text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-700 text-sm transition-all shadow-sm active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              Create Task
+            </button>
+          )}
         </div>
 
         <table className="w-full text-left border-collapse">
@@ -181,6 +215,14 @@ const ProjectDetailsPage = () => {
           </tbody>
         </table>
       </div>
+
+      {isCreateModalOpen && (
+        <CreateTaskModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onRefresh={fetchProject}
+          projectId={id}
+        />
+      )}
     </div>
   );
 };

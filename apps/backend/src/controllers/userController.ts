@@ -2,6 +2,7 @@ import { Response } from "express";
 import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { recordActivity } from "../utils/logger";
+import bcrypt from "bcryptjs";
 
 // GET /api/users/me
 export const getMyProfile = async (req: AuthRequest, res: Response) => {
@@ -79,11 +80,49 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
 
     await recordActivity(
       req.user!.userId,
-      `USER_DELETED: ${deletedUser.email}`,
+      "USER_DELETED",
+      "USER",
+      deletedUser.id
     );
     res.status(204).send();
   } catch (error) {
     console.error("Delete user error:", error);
     res.status(500).json({ error: "Failed to delete user." });
+  }
+};
+
+// PUT /api/users/me
+export const updateMyProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { firstName, lastName, password } = req.body;
+
+    // Prepare the data object
+    const updateData: any = {
+      firstName,
+      lastName,
+    };
+
+    // If a new password is sent, hash it before saving
+    if (password) {
+      updateData.passwordHash = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        roles: { select: { name: true } },
+      },
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ error: "Failed to update profile" });
   }
 };

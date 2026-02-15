@@ -1,20 +1,19 @@
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import { prisma } from "../lib/prisma";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+type EntityType = "PROJECT" | "TASK" | "COMMENT" | "USER";
 
-export const recordActivity = async (userId: string, action: string) => {
-  try {
-    await prisma.activityLog.create({
-      data: {
-        userId,
-        action,
-      },
-    });
-  } catch (error) {
-    console.error("Failed to record activity log:", error);
-  }
+export const recordActivity = async (
+  userId: string,
+  action: string,
+  entityType: EntityType,
+  entityId: string
+) => {
+  await prisma.activityLog.create({
+    data: {
+      userId,
+      action,
+      entityType,
+      entityId,
+    },
+  });
 };
