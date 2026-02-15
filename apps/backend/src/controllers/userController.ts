@@ -3,6 +3,76 @@ import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { recordActivity } from "../utils/logger";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+//  Validation schema for creating a user
+const createUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  role: z.enum(["ADMIN", "MANAGER", "VIEWER"]),
+});
+
+//  Admin Create User
+export const createUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const validatedData = createUserSchema.parse(req.body);
+    const { email, password, firstName, lastName, role } = validatedData;
+
+    // 1. Check if user exists
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ error: "User with this email already exists" });
+    }
+
+    // 2. Hash Password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // 3. Find Role ID
+    const roleRecord = await prisma.role.findUnique({ where: { name: role } });
+    if (!roleRecord) {
+      return res.status(400).json({ error: "Invalid role specified" });
+    }
+
+    // 4. Create User & Connect Role
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        firstName,
+        lastName,
+        roles: {
+          connect: { id: roleRecord.id },
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        roles: { select: { name: true } },
+        createdAt: true,
+      },
+    });
+
+    await recordActivity(
+      req.user!.userId,
+      `Created user ${email} as ${role}`,
+      "USER",
+      newUser.id,
+    );
+    res.status(201).json(newUser);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.issues });
+    }
+    console.error("Create user error:", error);
+    res.status(500).json({ error: "Failed to create user" });
+  }
+};
 
 // GET /api/users/me
 export const getMyProfile = async (req: AuthRequest, res: Response) => {
@@ -82,7 +152,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       req.user!.userId,
       "USER_DELETED",
       "USER",
-      deletedUser.id
+      deletedUser.id,
     );
     res.status(204).send();
   } catch (error) {

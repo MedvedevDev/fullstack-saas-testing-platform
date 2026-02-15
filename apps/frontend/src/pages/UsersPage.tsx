@@ -6,9 +6,12 @@ import {
   User as UserIcon,
   Search,
   AlertTriangle,
+  Plus,
+  Briefcase, // Icon for Manager
 } from "lucide-react";
 import api from "../api/axios";
 import type { User } from "../types/user";
+import CreateUserModal from "../components/CreateUserModal";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -16,6 +19,8 @@ const UsersPage = () => {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentUserRole, setCurrentUserRole] = useState<string>("");
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -38,19 +43,15 @@ const UsersPage = () => {
   };
 
   useEffect(() => {
-    // 1. Fetch Users
     fetchUsers();
-
-    // 2. Get Current User Role for UI Logic
     const userStr = localStorage.getItem("user");
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
-        // Assuming roles is an array of objects like [{ name: "ADMIN" }]
         const roleName = user.roles?.[0]?.name || "";
         setCurrentUserRole(roleName);
       } catch (e) {
-        console.error("Error parsing user from local storage", e);
+        console.error("Error parsing user", e);
       }
     }
   }, []);
@@ -60,7 +61,6 @@ const UsersPage = () => {
 
     try {
       await api.delete(`/users/${userId}`);
-      // Remove from UI on success
       setUsers(users.filter((u) => u.id !== userId));
       alert("User deleted successfully.");
     } catch (err: any) {
@@ -76,9 +76,30 @@ const UsersPage = () => {
       .includes(searchTerm.toLowerCase()),
   );
 
+  const getRoleBadge = (roles: any[]) => {
+    if (roles.some((r) => r.name === "ADMIN")) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase border bg-purple-50 text-purple-700 border-purple-200">
+          <Shield className="h-3 w-3" /> ADMIN
+        </span>
+      );
+    }
+    if (roles.some((r) => r.name === "MANAGER")) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase border bg-blue-50 text-blue-700 border-blue-200">
+          <Briefcase className="h-3 w-3" /> MANAGER
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase border bg-slate-50 text-slate-600 border-slate-200">
+        <UserIcon className="h-3 w-3" /> VIEWER
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-flow-text-main">
@@ -89,20 +110,30 @@ const UsersPage = () => {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="pl-9 pr-4 py-2 border border-flow-border rounded-lg text-sm w-full sm:w-64 focus:ring-2 focus:ring-flow-blue/20 outline-none"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="pl-9 pr-4 py-2 border border-flow-border rounded-lg text-sm w-full sm:w-64 focus:ring-2 focus:ring-flow-blue/20 outline-none"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {currentUserRole === "ADMIN" && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center gap-2 bg-flow-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-sm active:scale-95 whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4" />
+              Add User
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Error Banner */}
       {error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm font-medium border border-red-100 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4" />
@@ -110,7 +141,6 @@ const UsersPage = () => {
         </div>
       )}
 
-      {/* Table Section */}
       <div className="bg-white border border-flow-border rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead className="bg-gray-50 border-b border-flow-border">
@@ -173,26 +203,13 @@ const UsersPage = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                          isAdmin
-                            ? "bg-purple-50 text-purple-700 border-purple-200"
-                            : "bg-slate-50 text-slate-600 border-slate-200"
-                        }`}
-                      >
-                        {isAdmin ? (
-                          <Shield className="h-3 w-3" />
-                        ) : (
-                          <UserIcon className="h-3 w-3" />
-                        )}
-                        {isAdmin ? "ADMIN" : "MEMBER"}
-                      </span>
+                      {/* FIX: Correct Role Badge Logic */}
+                      {getRoleBadge(user.roles)}
                     </td>
                     <td className="px-6 py-4 text-sm text-flow-text-muted">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {/* ONLY SHOW DELETE IF CURRENT USER IS ADMIN */}
                       {currentUserRole === "ADMIN" && (
                         <button
                           onClick={() => handleDelete(user.id)}
@@ -210,6 +227,13 @@ const UsersPage = () => {
           </tbody>
         </table>
       </div>
+
+      {isCreateModalOpen && (
+        <CreateUserModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onRefresh={fetchUsers}
+        />
+      )}
     </div>
   );
 };

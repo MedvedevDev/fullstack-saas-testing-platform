@@ -8,16 +8,26 @@ const router = Router();
 router.get("/me", authenticateToken, userController.getMyProfile);
 router.put("/me", authenticateToken, userController.updateMyProfile);
 
+// Admin Routes
 router.get(
   "/",
   authenticateToken,
   requirePermission("manage:users"),
   userController.getAllUsers,
 );
+
+//  Create User (Admin only)
+router.post(
+  "/",
+  authenticateToken,
+  requirePermission("manage:users"),
+  userController.createUser,
+);
+
 router.delete(
   "/:id",
   authenticateToken,
-  requirePermission("manage:users"), // Or define a specific 'delete:users' permission if strictly Admin only
+  requirePermission("manage:users"),
   userController.deleteUser,
 );
 
