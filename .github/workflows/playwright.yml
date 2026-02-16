@@ -28,15 +28,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Use Node 22 (LTS) for modern tool support
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Install dependencies
+      - name: Install Root Dependencies
         run: npm ci
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+
+      - name: Install Backend Dependencies
+        working-directory: ./apps/backend
+        run: npm ci
+
+      - name: Install Frontend Dependencies
+        working-directory: ./apps/frontend
+        run: npm ci
 
       - name: Setup Backend (Migrate & Seed)
         working-directory: ./apps/backend
@@ -60,7 +69,6 @@ jobs:
         working-directory: ./apps/frontend
         run: npm run dev -- --host &
 
-      # FIX 3: Wait 60 seconds (Safe buffer)
       - name: Wait for servers
         run: sleep 60
 
