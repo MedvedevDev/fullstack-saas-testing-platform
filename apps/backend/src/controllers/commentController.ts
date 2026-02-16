@@ -71,12 +71,7 @@ export const createComment = async (req: AuthRequest, res: Response) => {
     });
 
     // TODO: Create an activity log for the comment
-    await recordActivity(
-      authorId,
-      "COMMENT_CREATED",
-      "COMMENT",
-      newComment.id
-    );
+    await recordActivity(authorId, "COMMENT_CREATED", "COMMENT", newComment.id);
     res.status(201).json(newComment);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -91,7 +86,8 @@ export const createComment = async (req: AuthRequest, res: Response) => {
  */
 export const updateComment = async (req: AuthRequest, res: Response) => {
   try {
-    const commentId = req.params.id;
+    // FIX 1: Type assertion 'as string' stops the "string[]" error
+    const commentId = (req.params.id as string) || "";
     const { content } = req.body;
     const user = req.user!;
 
@@ -107,6 +103,7 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "Comment not found" });
     }
 
+    // FIX 2: RESTORED the permission logic that was missing
     const canModify =
       user.roles.includes("ADMIN") ||
       user.roles.includes("MANAGER") ||
@@ -127,7 +124,7 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
       user.userId,
       "COMMENT_UPDATED",
       "COMMENT",
-      updatedComment.id
+      updatedComment.id, // passed as string
     );
 
     res.status(200).json(updatedComment);
@@ -141,7 +138,8 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
  */
 export const deleteComment = async (req: AuthRequest, res: Response) => {
   try {
-    const commentId = req.params.id;
+    // FIX 1: Type assertion here too
+    const commentId = (req.params.id as string) || "";
     const user = req.user!;
 
     const comment = await prisma.comment.findUnique({
@@ -152,6 +150,7 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "Comment not found" });
     }
 
+    // FIX 2: RESTORED permission logic
     const canModify =
       user.roles.includes("ADMIN") ||
       user.roles.includes("MANAGER") ||
