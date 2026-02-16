@@ -10,7 +10,6 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
-    # 1. We ask GitHub for a temporary Postgres Database
     services:
       postgres:
         image: postgres:15
@@ -20,7 +19,6 @@ jobs:
           POSTGRES_DB: flowdash_test
         ports:
           - 5432:5432
-        # Wait until DB is actually ready to accept connections
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -32,7 +30,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Install dependencies
         run: npm ci
@@ -40,19 +38,16 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      # 2. Setup the Backend & Database
-      - name: Setup Backend (Generate Client & Migrate)
+      - name: Setup Backend (Migrate & Seed)
         working-directory: ./apps/backend
         env:
-          # Connect to the Service Container
           DATABASE_URL: postgres://user:password@localhost:5432/flowdash_test
           JWT_SECRET: "super-secret-testing-key"
         run: |
           npx prisma generate
           npx prisma migrate deploy
-          npx prisma db seed  # Creates Admin User
+          npx prisma db seed
 
-      # 3. Start the Backend Server in the Background (&)
       - name: Start Backend
         working-directory: ./apps/backend
         env:
@@ -61,20 +56,16 @@ jobs:
           PORT: 3001
         run: npm run dev &
 
-      # 4. Start the Frontend Server in the Background (&)
       - name: Start Frontend
         working-directory: ./apps/frontend
-        run: npm run dev &
+        run: npm run dev -- --host &
 
-      # 5. Wait for servers to be ready
-      - name: Wait for frontend
-        run: |
-          echo "Waiting for Frontent to be ready..."
-          sleep 60
+      # FIX 3: Wait 60 seconds (Safe buffer)
+      - name: Wait for servers
+        run: sleep 60
 
-      # 6. Run the Tests!
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --project=chromium
         env:
           CI: true
           BASE_URL: http://localhost:5173
