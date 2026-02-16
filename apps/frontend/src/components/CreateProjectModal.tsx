@@ -51,6 +51,7 @@ const CreateProjectModal = ({
               Project Name
             </label>
             <input
+              data-testid="project-name-input"
               required
               placeholder="e.g., Marketing Campaign"
               className="w-full p-2.5 border border-flow-border rounded-lg text-sm focus:ring-2 focus:ring-flow-blue/20 focus:border-flow-blue outline-none transition-all"
@@ -66,6 +67,7 @@ const CreateProjectModal = ({
               Description (Optional)
             </label>
             <textarea
+              data-testid="project-name-desc"
               placeholder="What is this project about?"
               rows={3}
               className="w-full p-2.5 border border-flow-border rounded-lg text-sm focus:ring-2 focus:ring-flow-blue/20 focus:border-flow-blue outline-none transition-all resize-none"
