@@ -30,8 +30,22 @@ test.describe("Projects Module", () => {
 
     await expect(page.getByText(projectName)).toBeVisible();
 
+    await page.reload();
     // This verifies the project exists strictly inside the list
-    const newProject = projectsPage.getProject(projectName);
+    const newProject = projectsPage.getProjectCard(projectName);
     await expect(newProject).toBeVisible();
+  });
+
+  test.only("should allow user to delete a project", async ({ page }) => {
+    const projectName = `Delete me ${Date.now()}`;
+
+    await projectsPage.createProject(projectName, "Temp");
+    await expect(page.getByText(projectName)).toBeVisible();
+
+    await projectsPage.deleteProject(projectName);
+
+    // Verify
+    await page.reload();
+    await expect(page.getByText(projectName)).not.toBeVisible();
   });
 });

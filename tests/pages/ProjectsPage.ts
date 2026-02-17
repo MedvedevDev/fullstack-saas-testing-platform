@@ -11,7 +11,7 @@ export class ProjectsPage {
   readonly projectNameInput: Locator;
   readonly projectDescInput: Locator;
   readonly submitButton: Locator;
-  readonly projectList: Locator;
+  readonly projectsList: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -22,7 +22,7 @@ export class ProjectsPage {
     this.projectNameInput = page.getByTestId("project-name-input");
     this.projectDescInput = page.getByTestId("project-name-desc");
     this.submitButton = page.getByRole("button", { name: /create project/i });
-    this.projectList = page.locator("main");
+    this.projectsList = page.locator("main");
   }
 
   /**
@@ -53,7 +53,43 @@ export class ProjectsPage {
     await expect(this.projectNameInput).toBeHidden();
   }
 
-  getProject(name: string) {
-    return this.projectList.getByText(name);
+  getProjectCard(name: string) {
+    return this.projectsList.getByRole("link").filter({ hasText: name });
+  }
+
+  /**
+   * Deletes a project by its name.
+   * Handles the locator chaining to find the specific delete button for this project.
+   */
+  async deleteProject(name: string) {
+    // set up the listener to confirm deletion
+    this.page.once("dialog", async (dialog) => {
+      await dialog.accept();
+    });
+
+    const projectCard = this.projectsList
+      .getByRole("link")
+      .filter({ hasText: name })
+      .first();
+
+    const actionButton = projectCard
+      .getByRole("button")
+      .filter({ has: this.page.locator("svg.lucide-ellipsis-vertical") });
+    await actionButton.click();
+
+    const deleteOption = this.page.getByRole("button", { name: /delete/i });
+    await expect(deleteOption).toBeVisible();
+    await deleteOption.click();
+
+    // (Optional) Handle "Are you sure?" Modal
+    const confirmButton = this.page.getByRole("button", {
+      name: /confirm|yes/i,
+    });
+    if (await confirmButton.isVisible()) {
+      await confirmButton.click();
+    }
+
+    // Verify the card is gone
+    await expect(projectCard).toBeHidden();
   }
 }
