@@ -52,7 +52,7 @@ test.describe("Projects Module", () => {
     await expect(page.getByText(projectName)).not.toBeVisible();
   });
 
-  test.only("should allow user to edit a project", async ({ page }) => {
+  test("should allow user to edit a project", async ({ page }) => {
     const oldName = `Original ${Date.now()}`;
     const newName = `Updated ${Date.now()}`;
 
@@ -61,6 +61,7 @@ test.describe("Projects Module", () => {
     await projectsPage.editProject(oldName, {
       name: newName,
       status: "ARCHIVED",
+      description: "NEW DESCRIPTION",
       owner: "Olga Reilly (MANAGER)",
     });
 
