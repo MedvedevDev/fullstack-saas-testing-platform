@@ -1,28 +1,49 @@
 import { Page, Locator, expect } from "@playwright/test";
 
+export interface ProjectUpdates {
+  name?: string;
+  description?: string;
+  status?: "ACTIVE" | "ARCHIVED";
+  owner?: string;
+}
+
 /**
  * Page Object Model for the Projects management flow.
  * Handles the creation, listing, and interaction with Projects on the dashboard.
  */
 export class ProjectsPage {
   readonly page: Page;
-
   readonly createProjectButton: Locator;
   readonly projectNameInput: Locator;
   readonly projectDescInput: Locator;
   readonly submitButton: Locator;
   readonly projectsList: Locator;
+  readonly statusDropdown: Locator;
+  readonly ownerDropdown: Locator;
+  readonly projectNameInputUpdate: Locator;
+  readonly projectDescInputUpdate: Locator;
+  readonly saveChangesButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-
     this.createProjectButton = page.getByRole("button", {
       name: /new project/i,
     });
+    this.projectsList = page.locator("main");
+    // Create Project Modal fields
     this.projectNameInput = page.getByTestId("project-name-input");
     this.projectDescInput = page.getByTestId("project-name-desc");
     this.submitButton = page.getByRole("button", { name: /create project/i });
-    this.projectsList = page.locator("main");
+    // Edit Project Modal fields
+    this.projectNameInputUpdate = page.getByLabel(/project name/i);
+    this.projectDescInputUpdate = page.getByLabel(/description/i);
+    this.statusDropdown = page.getByLabel(/status/i);
+    this.saveChangesButton = page.getByRole("button", {
+      name: /save changes/i,
+    });
+    this.ownerDropdown = page
+      .locator("label", { hasText: /project owner/i })
+      .locator(" + div select");
   }
 
   /**
@@ -81,15 +102,46 @@ export class ProjectsPage {
     await expect(deleteOption).toBeVisible();
     await deleteOption.click();
 
-    // (Optional) Handle "Are you sure?" Modal
-    const confirmButton = this.page.getByRole("button", {
-      name: /confirm|yes/i,
-    });
-    if (await confirmButton.isVisible()) {
-      await confirmButton.click();
-    }
-
     // Verify the card is gone
     await expect(projectCard).toBeHidden();
+  }
+
+  /**
+   * Edits an existing project's name.
+   *  @param name - Project Name
+   * @param description - Project Description
+   * Flow: Open Menu -> Click Edit -> Change Name -> Save
+   */
+  async editProject(oldName: string, updates: ProjectUpdates) {
+    // Find the card by the old name and open Edit modal
+    const card = this.projectsList
+      .getByRole("link")
+      .filter({ hasText: oldName });
+
+    const actionButton = card
+      .getByRole("button")
+      .filter({ has: this.page.locator("svg.lucide-ellipsis-vertical") });
+    await actionButton.click();
+
+    const editOption = this.page.getByRole("button", { name: /edit/i });
+    await expect(editOption).toBeVisible();
+    await editOption.click();
+    // Wait for the form to appear
+    await expect(this.projectDescInputUpdate).toBeVisible();
+
+    await this.statusDropdown.click();
+    // // Apply updates
+    if (updates.name) await this.projectNameInputUpdate.fill(updates.name);
+    if (updates.description)
+      await this.projectDescInputUpdate.fill(updates.description);
+    if (updates.status) {
+      await this.statusDropdown.selectOption({ value: updates.status });
+    }
+    if (updates.owner) {
+      await this.ownerDropdown.selectOption({ label: updates.owner });
+    }
+
+    this.saveChangesButton.click();
+    await expect(this.projectNameInputUpdate).toBeHidden();
   }
 }

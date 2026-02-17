@@ -34,9 +34,12 @@ test.describe("Projects Module", () => {
     // This verifies the project exists strictly inside the list
     const newProject = projectsPage.getProjectCard(projectName);
     await expect(newProject).toBeVisible();
+
+    // Clean Up
+    await projectsPage.deleteProject(projectName);
   });
 
-  test.only("should allow user to delete a project", async ({ page }) => {
+  test("should allow user to delete a project", async ({ page }) => {
     const projectName = `Delete me ${Date.now()}`;
 
     await projectsPage.createProject(projectName, "Temp");
@@ -47,5 +50,22 @@ test.describe("Projects Module", () => {
     // Verify
     await page.reload();
     await expect(page.getByText(projectName)).not.toBeVisible();
+  });
+
+  test.only("should allow user to edit a project", async ({ page }) => {
+    const oldName = `Original ${Date.now()}`;
+    const newName = `Updated ${Date.now()}`;
+
+    await projectsPage.createProject(oldName, "Initial Description");
+
+    await projectsPage.editProject(oldName, {
+      name: newName,
+      status: "ARCHIVED",
+      owner: "Olga Reilly (MANAGER)",
+    });
+
+    // Verify Name Change
+    await expect(page.getByText(newName)).toBeVisible();
+    await expect(page.getByText(oldName)).not.toBeVisible();
   });
 });

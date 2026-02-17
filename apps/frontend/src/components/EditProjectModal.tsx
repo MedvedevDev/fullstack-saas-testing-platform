@@ -95,10 +95,14 @@ const EditProjectModal = ({
           )}
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="project-name-input-edit"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Project Name
             </label>
             <input
+              id="project-name-input-edit"
               type="text"
               required
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
@@ -137,10 +141,14 @@ const EditProjectModal = ({
           )}
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="project-desc-input-edit"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Description
             </label>
             <textarea
+              id="project-desc-input-edit"
               rows={3}
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none"
               value={description}
@@ -149,10 +157,14 @@ const EditProjectModal = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="status-dropdown"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Status
             </label>
             <select
+              id="status-dropdown"
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
