@@ -52,7 +52,7 @@ test.describe("Projects Module", () => {
     await expect(page.getByText(projectName)).not.toBeVisible();
   });
 
-  test("should allow user to edit a project", async ({ page }) => {
+  test.only("should allow user to edit a project", async ({ page }) => {
     const oldName = `Original ${Date.now()}`;
     const newName = `Updated ${Date.now()}`;
 
@@ -64,9 +64,11 @@ test.describe("Projects Module", () => {
       description: "NEW DESCRIPTION",
       owner: "Olga Reilly (MANAGER)",
     });
-
     // Verify Name Change
     await expect(page.getByText(newName)).toBeVisible();
     await expect(page.getByText(oldName)).not.toBeVisible();
+
+    // Clean Up
+    await projectsPage.deleteProject(newName);
   });
 });

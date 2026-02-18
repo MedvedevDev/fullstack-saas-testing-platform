@@ -47,7 +47,7 @@ export class ProjectsPage {
   }
 
   /**
-   * Navigates to the Projects route.
+   * ### Navigates to the Projects route.
    * @throws Error if the base URL is not reachable
    */
   async goto() {
@@ -57,7 +57,7 @@ export class ProjectsPage {
   }
 
   /**
-   * Creates a new project.
+   * ### Creates a new project.
    * @param name - Project Name
    * @param description - Project Description
    */
@@ -79,8 +79,7 @@ export class ProjectsPage {
   }
 
   /**
-   * Deletes a project by its name.
-   * Handles the locator chaining to find the specific delete button for this project.
+   * ### Deletes a project by its name.
    */
   async deleteProject(name: string) {
     // set up the listener to confirm deletion
@@ -107,10 +106,9 @@ export class ProjectsPage {
   }
 
   /**
-   * Edits an existing project's name.
+   * ### Edits an existing project's name.
    *  @param name - Project Name
    * @param description - Project Description
-   * Flow: Open Menu -> Click Edit -> Change Name -> Save
    */
   async editProject(oldName: string, updates: ProjectUpdates) {
     // Find the card by the old name and open Edit modal
@@ -129,7 +127,6 @@ export class ProjectsPage {
     // Wait for the form to appear
     await expect(this.projectDescInputUpdate).toBeVisible();
 
-    await this.statusDropdown.click();
     // // Apply updates
     if (updates.name) await this.projectNameInputUpdate.fill(updates.name);
     if (updates.description)
