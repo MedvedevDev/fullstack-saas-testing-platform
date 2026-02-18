@@ -24,6 +24,8 @@ export class ProjectsPage {
   readonly projectNameInputUpdate: Locator;
   readonly projectDescInputUpdate: Locator;
   readonly saveChangesButton: Locator;
+  readonly searchInput: Locator;
+  readonly filterButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -31,6 +33,8 @@ export class ProjectsPage {
       name: /new project/i,
     });
     this.projectsList = page.locator("main");
+    this.searchInput = page.getByPlaceholder("Search projects...");
+    this.filterButton = page.getByTestId("status-dropdown");
     // Create Project Modal fields
     this.projectNameInput = page.getByTestId("project-name-input");
     this.projectDescInput = page.getByTestId("project-name-desc");
@@ -75,12 +79,8 @@ export class ProjectsPage {
     await expect(this.projectNameInput).toBeHidden();
   }
 
-  getProjectCard(name: string) {
-    return this.projectsList.getByRole("link").filter({ hasText: name });
-  }
-
   /**
-   * ### Deletes a project by its name.
+   * ### Deletes a project by its name
    */
   async deleteProject(name: string) {
     // set up the listener to confirm deletion
@@ -101,13 +101,10 @@ export class ProjectsPage {
     const deleteOption = this.page.getByRole("button", { name: /delete/i });
     await expect(deleteOption).toBeVisible();
     await deleteOption.click();
-
-    // Verify the card is gone
-    await expect(projectCard).toBeHidden();
   }
 
   /**
-   * ### Edits an existing project's name.
+   * ### Edits an existing project's name
    *  @param name - Project Name
    * @param description - Project Description
    */
@@ -128,7 +125,7 @@ export class ProjectsPage {
     // Wait for the form to appear
     await expect(this.projectDescInputUpdate).toBeVisible();
 
-    // // Apply updates
+    // Apply updates
     if (updates.name) await this.projectNameInputUpdate.fill(updates.name);
     if (updates.description)
       await this.projectDescInputUpdate.fill(updates.description);
@@ -145,5 +142,92 @@ export class ProjectsPage {
 
     this.saveChangesButton.click();
     await expect(this.projectNameInputUpdate).toBeHidden();
+  }
+
+  /**
+   * Scan INSIDE that card for the Description, Status, and Date
+   */
+  async verifyProjectCard(
+    name: string,
+    details: { descripion: string; status: string; date: string },
+  ) {
+    // Locate the Card
+    const projectCard = this.projectsList
+      .getByRole("link")
+      .filter({ hasText: name })
+      .first();
+    await expect(projectCard).toBeVisible();
+    // Verify description
+    await expect(projectCard).toContainText(details.descripion);
+    // Verify status
+    await expect(
+      projectCard.locator("span").filter({ hasText: details.status }),
+    ).toBeVisible();
+    // Verify date
+    await expect(projectCard).toContainText(details.date);
+  }
+
+  /**
+   * Verifies that the list contains ONLY the projects matching the search term
+   */
+  async verifySearchFunction(searchTerm: string) {
+    // Ensure page is ready (Initial State)
+    await this.projectsList.getByRole("link").first().waitFor();
+
+    // Type the search term
+    await this.searchInput.fill(searchTerm);
+    await this.page.waitForTimeout(500);
+    // Verify the expected projects are displayed
+    const allTitles = await this.projectsList
+      .getByRole("link")
+      .locator("h3")
+      .allInnerTexts();
+
+    //Check if list is empty
+    expect(allTitles.length, "Search returned no results").toBeGreaterThan(0);
+
+    // Prove all the titles matchs search
+    for (const title of allTitles) {
+      expect(title).toContain(searchTerm);
+    }
+  }
+
+  /**
+   * Verifies the "No Projects Found" empty state
+   */
+  async verifyEmptySearchState() {
+    // Ensure page is ready (Initial State)
+    await this.projectsList.getByRole("link").first().waitFor();
+
+    await this.searchInput.fill("NO_PROJECT_NAME_XYZ");
+    await this.page.waitForTimeout(500);
+    // Verify all project cards are gone
+    await expect(this.projectsList.getByRole("link")).toHaveCount(0);
+    // Verify the "No projects found" message is visible
+    await expect(this.page.getByText("No projects found")).toBeVisible();
+  }
+
+  /**
+   * Filter by Status
+   */
+  async verifyFilterFunction(expectedStatus: "ACTIVE" | "ARCHIVED") {
+    //Ensure page is ready (Initial State)
+    await this.projectsList.getByRole("link").first().waitFor();
+
+    await this.filterButton.selectOption({ value: expectedStatus });
+    const allStatuses = await this.projectsList
+      .getByRole("link")
+      .locator("span")
+      .first()
+      .allInnerTexts();
+
+    //Check if list is empty
+    expect(allStatuses.length, "Filter returned no results!").toBeGreaterThan(
+      0,
+    );
+    // Loop through every Status
+    for (const status of allStatuses) {
+      expect(status.toLowerCase()).toBe(expectedStatus.toLocaleLowerCase());
+    }
   }
 }

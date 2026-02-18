@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { ProjectsPage } from "./pages/ProjectsPage";
 
+// Helper function
+function getTodayDate() {
+  const date = new Date();
+  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+}
+
 /**
  * Project Management Module Tests.
  * Covers the lifecycle of projects: Create, Read (List), Update, Delete.
@@ -14,32 +20,27 @@ test.describe("Projects Module", () => {
     projectsPage.goto();
   });
 
-  /**
-   * Test Scenario: User successfully creates a new project.
-   * * Steps:
-   * 1. Click "New Project"
-   * 2. Fill out the modal form
-   * 3. Submit
-   * 4. Verify the new project card appears in the list
-   */
-  test("should allow user to create a new project", async ({ page }) => {
+  test("verify create a new project", async ({ page }) => {
     const projectName = `Auto Project ${Date.now()}`;
     const projectDesc = `Created via Playwright`;
+    const currentDate = getTodayDate();
 
     await projectsPage.createProject(projectName, projectDesc);
-
     await expect(page.getByText(projectName)).toBeVisible();
+    // Verify project details are correct
+    await projectsPage.verifyProjectCard(projectName, {
+      descripion: "Created via Playwright",
+      status: "ACTIVE",
+      date: currentDate,
+    });
 
     await page.reload();
-    // This verifies the project exists strictly inside the list
-    const newProject = projectsPage.getProjectCard(projectName);
-    await expect(newProject).toBeVisible();
 
     // Clean Up
     await projectsPage.deleteProject(projectName);
   });
 
-  test("should allow user to delete a project", async ({ page }) => {
+  test("verify delete a project", async ({ page }) => {
     const projectName = `Delete me ${Date.now()}`;
 
     await projectsPage.createProject(projectName, "Temp");
@@ -52,9 +53,10 @@ test.describe("Projects Module", () => {
     await expect(page.getByText(projectName)).not.toBeVisible();
   });
 
-  test("should allow user to edit a project", async ({ page }) => {
+  test("verify edit a project", async ({ page }) => {
     const oldName = `Original ${Date.now()}`;
     const newName = `Updated ${Date.now()}`;
+    const currentDate = getTodayDate();
 
     await projectsPage.createProject(oldName, "Initial Description");
 
@@ -68,7 +70,45 @@ test.describe("Projects Module", () => {
     await expect(page.getByText(newName)).toBeVisible();
     await expect(page.getByText(oldName)).not.toBeVisible();
 
+    // Verify project details are correct
+    await projectsPage.verifyProjectCard(newName, {
+      descripion: "NEW DESCRIPTION",
+      status: "ARCHIVED",
+      date: currentDate,
+    });
+
     // Clean Up
     await projectsPage.deleteProject(newName);
+  });
+
+  test("verify filter  by status works correctly", async ({ page }) => {
+    // Should display only Archived projects
+    await projectsPage.verifyFilterFunction("ARCHIVED");
+    // Should display only Active projects
+    await projectsPage.verifyFilterFunction("ACTIVE");
+  });
+
+  test("verify search  works correctly", async ({ page }) => {
+    const projectToSearch = `Project To Search`;
+    const projectToSearch2 = `Project To Search 2`;
+    await projectsPage.createProject(projectToSearch, "Active description");
+    await projectsPage.createProject(projectToSearch2, "Active description");
+    // Search with valid name
+    await projectsPage.verifySearchFunction(projectToSearch);
+
+    //Search with empty string
+    await projectsPage.verifyEmptySearchState();
+    await projectsPage.searchInput.fill("");
+
+    // Clean up
+    const allTitles = await projectsPage.projectsList
+      .getByRole("heading", { level: 3 })
+      .allInnerTexts();
+    const titlesToDelete = allTitles.filter((title) =>
+      title.includes(projectToSearch),
+    );
+    for (const title of titlesToDelete) {
+      await projectsPage.deleteProject(projectToSearch);
+    }
   });
 });

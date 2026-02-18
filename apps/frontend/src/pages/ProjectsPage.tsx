@@ -155,6 +155,7 @@ const ProjectsPage = () => {
             Status:
           </span>
           <select
+            data-testid="status-dropdown"
             className="bg-transparent text-sm focus:outline-none text-gray-700 font-medium cursor-pointer w-full sm:w-auto"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
@@ -181,7 +182,11 @@ const ProjectsPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
-            <div key={project.id} className="relative group">
+            <div
+              key={project.id}
+              className="relative group"
+              test-dataid="project-card"
+            >
               <Link
                 to={`/projects/${project.id}`}
                 className="bg-white border border-flow-border p-6 rounded-xl shadow-sm hover:shadow-md transition-all block h-full"
