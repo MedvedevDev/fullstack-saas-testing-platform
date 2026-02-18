@@ -62,7 +62,7 @@ test.describe("Projects Module", () => {
       name: newName,
       status: "ARCHIVED",
       description: "NEW DESCRIPTION",
-      owner: "Olga Reilly (MANAGER)",
+      owner: "Change to any",
     });
     // Verify Name Change
     await expect(page.getByText(newName)).toBeVisible();

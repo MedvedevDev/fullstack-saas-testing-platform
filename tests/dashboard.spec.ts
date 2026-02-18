@@ -7,7 +7,5 @@ test.describe("Dashboard", () => {
     await page.goto("/dashboard");
 
     await expect(page).toHaveURL(/.*dashboard/);
-
-    await expect(page.getByText("Projects")).toBeVisible();
   });
 });

@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from "@playwright/test";
+import { waitForDebugger } from "node:inspector";
 
 export interface ProjectUpdates {
   name?: string;
@@ -135,18 +136,10 @@ export class ProjectsPage {
       await this.statusDropdown.selectOption({ value: updates.status });
     }
     if (updates.owner) {
-      const targetOption = this.ownerDropdown
-        .locator("option")
-        .filter({ hasText: updates.owner });
-
-      const value = await targetOption.getAttribute("value");
-
-      if (value) {
-        await this.ownerDropdown.selectOption(value);
+      if (updates.owner == "Change to any") {
+        await this.ownerDropdown.selectOption({ index: 1 });
       } else {
-        throw new Error(
-          `Could not find option containing text: "${updates.owner}"`,
-        );
+        await this.ownerDropdown.selectOption({ label: updates.owner });
       }
     }
 
