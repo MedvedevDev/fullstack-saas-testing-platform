@@ -82,10 +82,14 @@ const EditTaskModal = ({ task, onClose, onRefresh }: EditTaskModalProps) => {
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="task-title"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Task Title
             </label>
             <input
+              id="task-title"
               type="text"
               required
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
@@ -96,10 +100,14 @@ const EditTaskModal = ({ task, onClose, onRefresh }: EditTaskModalProps) => {
 
           {/* Assignee Selection */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="task-assignee"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Assignee
             </label>
             <select
+              id="task-assignee"
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
               value={assigneeId}
               onChange={(e) => setAssigneeId(e.target.value)}
@@ -115,13 +123,16 @@ const EditTaskModal = ({ task, onClose, onRefresh }: EditTaskModalProps) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                htmlFor="task-status"
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >
                 Status
               </label>
               <select
+                id="task-status"
                 className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={status}
-                // FIX: Type assertion here
                 onChange={(e) => setStatus(e.target.value as any)}
               >
                 <option value="TODO">To Do</option>
@@ -131,13 +142,16 @@ const EditTaskModal = ({ task, onClose, onRefresh }: EditTaskModalProps) => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                htmlFor="task-priority"
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >
                 Priority
               </label>
               <select
+                id="task-priority"
                 className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={priority}
-                // FIX: Type assertion here
                 onChange={(e) => setPriority(e.target.value as any)}
               >
                 <option value="LOW">Low</option>
@@ -149,12 +163,16 @@ const EditTaskModal = ({ task, onClose, onRefresh }: EditTaskModalProps) => {
 
           {/* Due Date */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="task-due-date"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Due Date
             </label>
             <div className="relative">
               <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
+                id="task-due-date"
                 type="date"
                 className="w-full pl-10 p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={dueDate}
@@ -165,10 +183,14 @@ const EditTaskModal = ({ task, onClose, onRefresh }: EditTaskModalProps) => {
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="task-desc"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Description
             </label>
             <textarea
+              id="task-desc"
               rows={3}
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none resize-none"
               value={description}

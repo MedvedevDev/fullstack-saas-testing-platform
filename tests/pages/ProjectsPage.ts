@@ -230,4 +230,15 @@ export class ProjectsPage {
       expect(status.toLowerCase()).toBe(expectedStatus.toLocaleLowerCase());
     }
   }
+
+  /**
+   *  Open projct details
+   */
+  async openProject(name: string) {
+    const card = this.projectsList
+      .getByRole("link")
+      .filter({ hasText: name })
+      .first();
+    await card.click();
+  }
 }

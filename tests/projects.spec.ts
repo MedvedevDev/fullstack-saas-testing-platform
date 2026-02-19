@@ -49,7 +49,6 @@ test.describe("Projects Module", () => {
     await projectsPage.deleteProject(projectName);
 
     // Verify
-    await page.reload();
     await expect(page.getByText(projectName)).not.toBeVisible();
   });
 

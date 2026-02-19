@@ -91,10 +91,14 @@ const CreateTaskModal = ({
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="task-title"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Task Title
             </label>
             <input
+              id="task-title"
               type="text"
               required
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
@@ -107,10 +111,14 @@ const CreateTaskModal = ({
           <div className="grid grid-cols-2 gap-4">
             {/* Project Selection */}
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                htmlFor="task-project"
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >
                 Project
               </label>
               <select
+                id="task-project"
                 required
                 className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={selectedProjectId}
@@ -126,12 +134,16 @@ const CreateTaskModal = ({
               </select>
             </div>
 
-            {/* Assignee Selection (NEW) */}
+            {/* Assignee Selection */}
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                htmlFor="task-assignee"
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >
                 Assignee
               </label>
               <select
+                id="task-assignee"
                 className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
@@ -149,10 +161,14 @@ const CreateTaskModal = ({
           <div className="grid grid-cols-2 gap-4">
             {/* Status */}
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                htmlFor="task-status"
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >
                 Status
               </label>
               <select
+                id="task-status"
                 className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -165,10 +181,14 @@ const CreateTaskModal = ({
 
             {/* Priority */}
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                htmlFor="task-priority"
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >
                 Priority
               </label>
               <select
+                id="task-priority"
                 className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
@@ -182,12 +202,16 @@ const CreateTaskModal = ({
 
           {/* Due Date */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              htmlFor="task-due-date"
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >
               Due Date
             </label>
             <div className="relative">
               <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
+                id="task-due-date"
                 type="date"
                 className="w-full pl-10 p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={dueDate}
@@ -198,10 +222,14 @@ const CreateTaskModal = ({
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              htmlFor="task-desc"
+            >
               Description
             </label>
             <textarea
+              id="task-desc"
               rows={3}
               className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none resize-none"
               placeholder="Add details..."
