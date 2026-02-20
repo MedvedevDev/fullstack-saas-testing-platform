@@ -96,6 +96,7 @@ export class ProjectsPage {
     const actionButton = projectCard
       .getByRole("button")
       .filter({ has: this.page.locator("svg.lucide-ellipsis-vertical") });
+    await actionButton.hover();
     await actionButton.click();
 
     const deleteOption = this.page.getByRole("button", { name: /delete/i });
