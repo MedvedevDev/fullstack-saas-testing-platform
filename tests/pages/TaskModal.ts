@@ -10,6 +10,7 @@ export class TaskModal {
   readonly descriptionInput: Locator;
   readonly createButton: Locator;
   readonly saveButton: Locator;
+  readonly projectSelect: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -19,6 +20,7 @@ export class TaskModal {
     this.prioritySelect = page.getByLabel(/priority/i);
     this.dueDateInput = page.getByLabel(/due date/i);
     this.descriptionInput = page.getByLabel(/description/i);
+    this.projectSelect = page.getByLabel(/project/i);
 
     this.createButton = page
       .locator("form")
@@ -34,6 +36,7 @@ export class TaskModal {
    */
   async fillTaskDetails(details: {
     title?: string;
+    project?: string;
     assignee?: string;
     status?: string;
     priority?: string;
@@ -41,6 +44,8 @@ export class TaskModal {
     description?: string;
   }) {
     if (details.title) await this.titleInput.fill(details.title);
+    if (details.project)
+      await this.projectSelect.selectOption({ label: details.project });
     if (details.description)
       await this.descriptionInput.fill(details.description);
     if (details.assignee)

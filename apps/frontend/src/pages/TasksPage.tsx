@@ -226,6 +226,7 @@ const TasksPage = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
+            aria-label="Search tasks"
             type="text"
             placeholder="Search tasks, projects, assignees..."
             className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -242,6 +243,7 @@ const TasksPage = () => {
             </h3>
             <div className="flex gap-4">
               <select
+                aria-label="Filter by Status"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50"
                 value={statusDropdown}
                 onChange={(e) => setStatusDropdown(e.target.value)}
@@ -253,6 +255,7 @@ const TasksPage = () => {
               </select>
 
               <select
+                aria-label="Filter by Priority"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50"
                 value={priorityDropdown}
                 onChange={(e) => setPriorityDropdown(e.target.value)}

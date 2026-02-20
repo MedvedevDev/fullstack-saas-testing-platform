@@ -93,7 +93,8 @@ test.describe("Tasks List on the Projects Details page", () => {
     const projectsToDelete = allTitles.filter(
       (title) =>
         title.includes("Task Test Project") ||
-        title.includes("Project Name To Test"),
+        title.includes("Project Name To Test") ||
+        title.includes("Auto Project"),
     );
     for (const name of projectsToDelete) {
       await projectsPage.deleteProject(name);
