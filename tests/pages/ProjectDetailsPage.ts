@@ -41,6 +41,18 @@ export class ProjectDetailsPage {
   }
 
   /**
+   * Verify Task is in the list with specific details
+   */
+  async verifyTaskInList(taskName: string, expectedPriority: string) {
+    const row = this.getTaskRow(taskName);
+    await expect(row).toBeVisible();
+
+    await expect(
+      row.getByRole("cell", { name: expectedPriority }),
+    ).toBeVisible();
+  }
+
+  /**
    * Verify "No tasks yet" empty state
    */
   async verifyEmptyState() {
@@ -71,5 +83,12 @@ export class ProjectDetailsPage {
     const row = this.getTaskRow(taskName);
     const editButton = row.getByRole("button", { name: "Edit Task" });
     await editButton.click({ force: true });
+  }
+
+  /**
+   * Verify the exact number of tasks shown in the header
+   */
+  async verifyTaskCount(count: number) {
+    await expect(this.tasksHeader).toHaveText(`Project Tasks (${count})`);
   }
 }

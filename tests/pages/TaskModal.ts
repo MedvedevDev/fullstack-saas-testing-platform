@@ -20,8 +20,12 @@ export class TaskModal {
     this.dueDateInput = page.getByLabel(/due date/i);
     this.descriptionInput = page.getByLabel(/description/i);
 
-    this.createButton = page.getByRole("button", { name: /create task/i });
-    this.saveButton = page.getByRole("button", { name: /save changes/i });
+    this.createButton = page
+      .locator("form")
+      .getByRole("button", { name: /create task/i });
+    this.saveButton = page
+      .locator("form")
+      .getByRole("button", { name: /save changes/i });
   }
 
   /**
