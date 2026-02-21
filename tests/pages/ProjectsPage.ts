@@ -102,6 +102,8 @@ export class ProjectsPage {
     const deleteOption = this.page.getByRole("button", { name: /delete/i });
     await expect(deleteOption).toBeVisible();
     await deleteOption.click();
+
+    await this.page.waitForTimeout(500);
   }
 
   /**

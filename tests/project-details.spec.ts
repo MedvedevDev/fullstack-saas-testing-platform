@@ -45,7 +45,7 @@ test.describe("Tasks List on the Projects Details page", () => {
   }) => {
     const projectName = `Task Test Project ${Date.now()}`;
     const taskName = "Build Login Page";
-    const updatedTaskName = "Build Login Page V2";
+    const updatedTaskName = "Build Login Page 2";
 
     await projectsPage.createProject(projectName, "Testing tasks");
     await projectsPage.openProject(projectName);

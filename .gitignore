@@ -2,7 +2,6 @@ node_modules/
 .env
 dist/
 *.log
-README.md
 USER_MANUAL.md
 
 # Playwright

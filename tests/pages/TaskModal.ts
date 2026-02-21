@@ -1,4 +1,4 @@
-import { Page, Locator } from "@playwright/test";
+import { Page, Locator, expect } from "@playwright/test";
 
 export class TaskModal {
   readonly page: Page;
@@ -16,8 +16,8 @@ export class TaskModal {
     this.page = page;
     this.titleInput = page.getByLabel(/task title/i);
     this.assigneeSelect = page.getByLabel(/assignee/i);
-    this.statusSelect = page.getByLabel(/status/i);
-    this.prioritySelect = page.getByLabel(/priority/i);
+    this.statusSelect = page.locator("form").getByLabel(/status/i);
+    this.prioritySelect = page.locator("form").getByLabel(/priority/i);
     this.dueDateInput = page.getByLabel(/due date/i);
     this.descriptionInput = page.getByLabel(/description/i);
     this.projectSelect = page.getByLabel(/project/i);
@@ -31,8 +31,8 @@ export class TaskModal {
   }
 
   /**
-   * Fills out the form fields.
-   * It only fills the ones you provide in the test.
+   * Fills out the form fields
+   * Only fills the inputs you provide in the test
    */
   async fillTaskDetails(details: {
     title?: string;
@@ -43,6 +43,7 @@ export class TaskModal {
     dueDate?: string;
     description?: string;
   }) {
+    await expect(this.titleInput).toBeVisible();
     if (details.title) await this.titleInput.fill(details.title);
     if (details.project)
       await this.projectSelect.selectOption({ label: details.project });

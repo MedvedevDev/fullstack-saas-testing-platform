@@ -35,7 +35,7 @@ export class TasksPage {
     await expect(row).toBeVisible();
   }
 
-  async verifyAllRowsAfterSearch(expectedValues: string[]) {
+  async verifyAllRows(expectedValues: string[]) {
     const allRows = this.tasksTableBody.getByRole("row");
     const totalCount = await allRows.count();
     expect(totalCount).toBeGreaterThan(0);
@@ -46,5 +46,15 @@ export class TasksPage {
     }
 
     await expect(matchRows).toHaveCount(totalCount);
+  }
+
+  async setDropdownFilters(statusLabel?: string, priorityLabel?: string) {
+    if (statusLabel) {
+      await this.statusDropdown.selectOption({ label: statusLabel });
+    }
+    if (priorityLabel) {
+      await this.priorityDropdown.selectOption({ label: priorityLabel });
+    }
+    await this.page.waitForTimeout(500);
   }
 }
