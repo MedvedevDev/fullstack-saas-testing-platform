@@ -50,7 +50,6 @@ test.describe("Global Tasks Page", () => {
     const projectName = `Search Project ${Date.now()}`;
     const taskFindMe = `Find Me Task ${Date.now()}`;
     const taskFindMe2 = `Find Me Task 2 ${Date.now()}`;
-    const taskHideMe = `Hidden Task ${Date.now()}`;
 
     await projectsPage.goto();
     await projectsPage.createProject(projectName, "Testing search");
@@ -159,5 +158,49 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.verifyAllRows(["ToDo", "Low"]);
     // Reset dropdowns
     await tasksPage.setDropdownFilters("Any Status", "Any Priority");
+  });
+
+  test("Edit and Delete a Task", async ({ page }) => {
+    const projectName = `Project ${Date.now()}`;
+    const taskName = "Task to Edit";
+    const updatedName = "Task is Updated";
+
+    await projectsPage.goto();
+    await projectsPage.createProject(projectName, "Testing manage");
+    await tasksPage.goto();
+
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({ title: taskName, project: projectName });
+    await taskModal.submitCreate();
+
+    // Edit the task
+    const taskRow = tasksPage.tasksTableBody
+      .getByRole("row")
+      .filter({ hasText: taskName });
+    const editButton = taskRow.getByRole("button", { name: /edit task/i });
+    await editButton.hover();
+    await editButton.click();
+    await taskModal.fillTaskDetails({ title: updatedName, priority: "High" });
+    await taskModal.submitEdit();
+
+    // Verify task is updated
+    await tasksPage.verifyTaskVisible(updatedName);
+    await expect(
+      tasksPage.tasksTableBody.getByRole("row").filter({ hasText: taskName }),
+    ).toBeHidden();
+
+    // Delete the task
+    page.once("dialog", (dialog) => dialog.accept());
+    const updatedRow = tasksPage.tasksTableBody
+      .getByRole("row")
+      .filter({ hasText: updatedName });
+    const deleteButton = updatedRow.getByRole("button", {
+      name: /delete task/i,
+    });
+    await deleteButton.hover();
+    await deleteButton.click();
+
+    // Verify task is deleted
+    await expect(updatedRow).toBeHidden();
   });
 });
