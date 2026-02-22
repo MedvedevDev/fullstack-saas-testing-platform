@@ -57,4 +57,14 @@ export class TasksPage {
     }
     await this.page.waitForTimeout(500);
   }
+
+  async toggleCheckbox(name: string) {
+    await this.page.getByRole("checkbox", { name: name }).check();
+    await this.page.waitForTimeout(500);
+  }
+
+  async untoggleCheckbox(name: string) {
+    await this.page.getByRole("checkbox", { name: name }).uncheck();
+    await this.page.waitForTimeout(500);
+  }
 }

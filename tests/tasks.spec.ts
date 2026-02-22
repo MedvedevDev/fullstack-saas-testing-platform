@@ -203,6 +203,121 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.setDropdownFilters("Any Status", "Any Priority");
   });
 
+  test("Filter tasks using Checkboxs", async ({ page }) => {
+    const projectName = `Dropdown Project ${Date.now()}`;
+    testProjects.push(projectName);
+    const taskHighToDo = "Checkbox High ToDo";
+    const taskDoneLow = "Checkbox Done Low";
+    const taskMediumDone = "Checkbox Medium Done";
+    const taskLowToDo = "Checkbox Low ToDo";
+    const taskDoneHigh = "Checkbox DoneHigh";
+    const taskInProgressHigh = "Checkbox In Progress High";
+
+    await projectsPage.goto();
+    await projectsPage.createProject(projectName, "Testing checkboxes");
+
+    await tasksPage.goto();
+
+    // Create Task 1: To Do + High
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskHighToDo,
+      project: projectName,
+      status: "To Do",
+      priority: "High",
+    });
+    await taskModal.submitCreate();
+
+    // Create Task 2: Done + Low
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskDoneLow,
+      project: projectName,
+      status: "Done",
+      priority: "Low",
+    });
+    await taskModal.submitCreate();
+
+    // Create Task 3: Done + Medium
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskMediumDone,
+      project: projectName,
+      status: "Done",
+      priority: "Medium",
+    });
+    await taskModal.submitCreate();
+
+    // Create Task 4: To Do + Low
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskLowToDo,
+      project: projectName,
+      status: "To Do",
+      priority: "Low",
+    });
+    await taskModal.submitCreate();
+
+    // Create Task 5: Done + High
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskDoneHigh,
+      project: projectName,
+      status: "Done",
+      priority: "High",
+    });
+    await taskModal.submitCreate();
+
+    // Create Task 6: In Progress + High
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskInProgressHigh,
+      project: projectName,
+      status: "In Progress",
+      priority: "High",
+    });
+    await taskModal.submitCreate();
+
+    //  Filter by "Done" status checkbox
+    await tasksPage.toggleCheckbox("Done");
+    await tasksPage.verifyTaskVisible(taskDoneHigh);
+    await tasksPage.verifyAllRows(["Done"]);
+    // Reset dropdowns
+    await tasksPage.untoggleCheckbox("Done");
+
+    //  Filter by "Medium" priority checkbox
+    await tasksPage.toggleCheckbox("Medium");
+    await tasksPage.verifyTaskVisible(taskMediumDone);
+    await tasksPage.verifyAllRows(["Medium"]);
+    // Reset dropdowns
+    await tasksPage.untoggleCheckbox("Medium");
+
+    //  Filter by "In Progress"  +  "High"
+    await tasksPage.toggleCheckbox("High");
+    await tasksPage.toggleCheckbox("In Progress");
+    await tasksPage.verifyTaskVisible(taskInProgressHigh);
+    await tasksPage.verifyAllRows(["High", "In Progress"]);
+    // Reset dropdowns
+    await tasksPage.untoggleCheckbox("High");
+    await tasksPage.untoggleCheckbox("In Progress");
+
+    //  Filter by "In Progress"  + "To Do" + "High"
+    await tasksPage.toggleCheckbox("High");
+    await tasksPage.toggleCheckbox("In Progress");
+    await tasksPage.toggleCheckbox("To Do");
+    await tasksPage.verifyTaskVisible(taskInProgressHigh);
+    await tasksPage.verifyTaskVisible(taskHighToDo);
+    //Verify that 'Done' task is not visible
+    const doneRow = tasksPage.tasksTableBody
+      .getByRole("row")
+      .filter({ hasText: taskDoneHigh });
+    await expect(doneRow).toBeHidden();
+    // Reset dropdowns
+    await tasksPage.untoggleCheckbox("High");
+    await tasksPage.untoggleCheckbox("In Progress");
+    await tasksPage.untoggleCheckbox("To Do");
+  });
+
   test("Edit and Delete a Task", async ({ page }) => {
     const projectName = `Project To Edit And Delete ${Date.now()}`;
     testProjects.push(projectName);
