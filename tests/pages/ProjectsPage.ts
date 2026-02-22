@@ -97,6 +97,7 @@ export class ProjectsPage {
       .getByRole("button")
       .filter({ has: this.page.locator("svg.lucide-ellipsis-vertical") });
     await actionButton.hover();
+    await this.page.waitForTimeout(300);
     await actionButton.click();
 
     const deleteOption = this.page.getByRole("button", { name: /delete/i });

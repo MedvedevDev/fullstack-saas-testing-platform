@@ -1,21 +1,28 @@
 import { test, expect } from "@playwright/test";
-import { TaskModal } from "./TaskModal";
-import { TasksPage } from "./TasksPage";
-import { ProjectsPage } from "./ProjectsPage";
+import { TaskModal } from "./pages/TaskModal";
+import { TasksPage } from "./pages/TasksPage";
+import { ProjectsPage } from "./pages/ProjectsPage";
+import { UsersPage } from "./pages/UsersPage";
 
 test.describe("Global Tasks Page", () => {
+  test.setTimeout(120000);
   let taskModal: TaskModal;
   let tasksPage: TasksPage;
   let projectsPage: ProjectsPage;
+  let usersPage: UsersPage;
+  let testProjects: string[] = []; // projects array to delete clean up
 
   test.beforeEach(async ({ page }) => {
     taskModal = new TaskModal(page);
     tasksPage = new TasksPage(page);
     projectsPage = new ProjectsPage(page);
+    usersPage = new UsersPage(page);
+    testProjects = [];
   });
 
   test("Search task  by name", async ({ page }) => {
     const projectName = `Search Project ${Date.now()}`;
+    testProjects.push(projectName);
     const taskFindMe = `Find Me Task ${Date.now()}`;
     const taskHideMe = `Hidden Task ${Date.now()}`;
 
@@ -48,6 +55,7 @@ test.describe("Global Tasks Page", () => {
 
   test("Search task  by project", async ({ page }) => {
     const projectName = `Search Project ${Date.now()}`;
+    testProjects.push(projectName);
     const taskFindMe = `Find Me Task ${Date.now()}`;
     const taskFindMe2 = `Find Me Task 2 ${Date.now()}`;
 
@@ -78,8 +86,43 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.verifyAllRows([projectName]);
   });
 
+  test("Search task by assignee name", async ({ page }) => {
+    const projectName = `Search Project by Assignee ${Date.now()}`;
+    testProjects.push(projectName);
+    const taskFindMe = `Find Me Task ${Date.now()}`;
+    const firstName = "Christiano";
+    const lastName = "Ronaldo";
+    const fullName = `${firstName} ${lastName}`;
+    const email = `auto.user${Date.now()}@test.com`;
+    // Create the project
+    await projectsPage.goto();
+    await projectsPage.createProject(projectName, "Testing search by Assignee");
+
+    // Create the user
+    await usersPage.goto();
+    await usersPage.createUser(firstName, lastName, email);
+
+    // Create the task
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskFindMe,
+      project: projectName,
+      assignee: fullName,
+    });
+    await taskModal.submitCreate();
+
+    // Test search by assignee
+    await tasksPage.searchTask(fullName);
+
+    // Verify search
+    await tasksPage.verifyTaskVisible(taskFindMe);
+    await tasksPage.verifyAllRows([fullName]);
+  });
+
   test("Filter tasks using Dropdowns", async ({ page }) => {
     const projectName = `Dropdown Project ${Date.now()}`;
+    testProjects.push(projectName);
     const taskHighToDo = "Task High ToDo";
     const taskDoneLow = "Task Done Low";
     const taskMediumDone = "Task Medium Done";
@@ -161,7 +204,8 @@ test.describe("Global Tasks Page", () => {
   });
 
   test("Edit and Delete a Task", async ({ page }) => {
-    const projectName = `Project ${Date.now()}`;
+    const projectName = `Project To Edit And Delete ${Date.now()}`;
+    testProjects.push(projectName);
     const taskName = "Task to Edit";
     const updatedName = "Task is Updated";
 
@@ -202,5 +246,19 @@ test.describe("Global Tasks Page", () => {
 
     // Verify task is deleted
     await expect(updatedRow).toBeHidden();
+  });
+
+  test.afterEach(async ({ page }) => {
+    const projectsPage = new ProjectsPage(page);
+    await projectsPage.goto();
+
+    const allProjectTitles = await page
+      .getByRole("heading", { level: 3 })
+      .allInnerTexts();
+
+    // Delete all test projects
+    for (const name of testProjects) {
+      await projectsPage.deleteProject(name);
+    }
   });
 });

@@ -409,7 +409,7 @@ const TasksPage = () => {
                       </span>
                       {task.assignee && (
                         <span className="text-[10px] font-bold text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 uppercase">
-                          {task.assignee.firstName}
+                          {task.assignee.firstName} {task.assignee.lastName}
                         </span>
                       )}
                     </div>

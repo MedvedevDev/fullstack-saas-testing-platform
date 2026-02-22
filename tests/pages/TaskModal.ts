@@ -60,11 +60,13 @@ export class TaskModal {
 
   async submitCreate() {
     await this.createButton.click();
+    await expect(this.createButton).toBeHidden();
     await this.createButton.waitFor({ state: "hidden" });
   }
 
   async submitEdit() {
     await this.saveButton.click();
+    await expect(this.saveButton).toBeHidden();
     await this.saveButton.waitFor({ state: "hidden" });
   }
 }

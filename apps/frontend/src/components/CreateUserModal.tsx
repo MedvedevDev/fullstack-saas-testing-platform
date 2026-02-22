@@ -79,12 +79,16 @@ const CreateUserModal = ({ onClose, onRefresh }: CreateUserModalProps) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+                htmlFor="user-name"
+              >
                 First Name
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                 <input
+                  id="user-name"
                   type="text"
                   required
                   placeholder="John"
@@ -97,10 +101,14 @@ const CreateUserModal = ({ onClose, onRefresh }: CreateUserModalProps) => {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <label
+                className="block text-xs font-bold text-gray-500 uppercase mb-1"
+                htmlFor="user-lastname"
+              >
                 Last Name
               </label>
               <input
+                id="user-lastname"
                 type="text"
                 required
                 placeholder="Doe"
@@ -114,12 +122,16 @@ const CreateUserModal = ({ onClose, onRefresh }: CreateUserModalProps) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              htmlFor="user-email"
+            >
               Email Address
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
+                id="user-email"
                 type="email"
                 required
                 placeholder="john.doe@company.com"
@@ -133,12 +145,16 @@ const CreateUserModal = ({ onClose, onRefresh }: CreateUserModalProps) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              htmlFor="user-password"
+            >
               Password
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
+                id="user-password"
                 type="password"
                 required
                 minLength={6}
@@ -153,12 +169,16 @@ const CreateUserModal = ({ onClose, onRefresh }: CreateUserModalProps) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <label
+              className="block text-xs font-bold text-gray-500 uppercase mb-1"
+              htmlFor="user-role"
+            >
               Assign Role
             </label>
             <div className="relative">
               <Shield className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <select
+                id="user-role"
                 className="w-full pl-9 p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                 value={formData.role}
                 onChange={(e) =>
