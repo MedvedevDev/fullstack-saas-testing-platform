@@ -338,6 +338,7 @@ const TasksPage = () => {
               </th>
 
               <th
+                data-testid="sort-status"
                 className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-flow-text-muted whitespace-nowrap cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort("status")}
               >
@@ -347,6 +348,7 @@ const TasksPage = () => {
               </th>
 
               <th
+                data-testid="sort-priority"
                 className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-flow-text-muted cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort("priority")}
               >
@@ -356,6 +358,7 @@ const TasksPage = () => {
               </th>
 
               <th
+                data-testid="sort-dueDate"
                 className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-flow-text-muted whitespace-nowrap cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort("dueDate")}
               >
@@ -365,6 +368,7 @@ const TasksPage = () => {
               </th>
 
               <th
+                data-testid="sort-createdAt"
                 className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-flow-text-muted whitespace-nowrap cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort("createdAt")}
               >

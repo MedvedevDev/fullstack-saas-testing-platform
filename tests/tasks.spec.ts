@@ -4,6 +4,12 @@ import { TasksPage } from "./pages/TasksPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { UsersPage } from "./pages/UsersPage";
 
+function getFutureDate(monthsAhead: number): string {
+  const date = new Date();
+  date.setMonth(date.getMonth() + monthsAhead);
+  return date.toISOString().split("T")[0];
+}
+
 test.describe("Global Tasks Page", () => {
   test.setTimeout(120000);
   let taskModal: TaskModal;
@@ -361,6 +367,176 @@ test.describe("Global Tasks Page", () => {
 
     // Verify task is deleted
     await expect(updatedRow).toBeHidden();
+  });
+
+  test("Sort tasks by Status", async ({ page }) => {
+    const projectName = `Sort Project ${Date.now()}`;
+    testProjects.push(projectName);
+
+    const taskToDo = `To Do task ${Date.now()}`;
+    const taskInProgress = `In Progress Task ${Date.now()}`;
+    const taskDone = `Done task ${Date.now()}`;
+
+    await projectsPage.goto();
+    await projectsPage.createProject(projectName, "Sorting tasks");
+
+    // Setup tasks
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskToDo,
+      project: projectName,
+      status: "To Do",
+    });
+    await taskModal.submitCreate();
+
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskInProgress,
+      project: projectName,
+      status: "In Progress",
+    });
+    await taskModal.submitCreate();
+
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskDone,
+      project: projectName,
+      status: "Done",
+    });
+    await taskModal.submitCreate();
+
+    // Hide seeded data
+    await tasksPage.searchTask(projectName);
+
+    // Sort Ascending
+    await tasksPage.clickSortHeader("sort-status");
+    let sortedTasks = await tasksPage.getSortedTaskTitles();
+    expect(sortedTasks).toEqual([taskDone, taskInProgress, taskToDo]);
+
+    // Sort Descending
+    await tasksPage.clickSortHeader("sort-status");
+    sortedTasks = await tasksPage.getSortedTaskTitles();
+    expect(sortedTasks).toEqual([taskToDo, taskInProgress, taskDone]);
+  });
+
+  test("Sort tasks by Due Date", async ({ page }) => {
+    // Generate  future dates
+    const date1Month = getFutureDate(1);
+    const date2Month = getFutureDate(2);
+    const date6Month = getFutureDate(6);
+
+    const projectName = `Sort Project ${Date.now()}`;
+    testProjects.push(projectName);
+
+    const task_6_MonthAhead = `6 Month Ahead ${Date.now()}`;
+    const task_1_MonthAhead = `1 Month Ahead ${Date.now()}`;
+    const task_2_MonthAhead = `2 Month Ahead ${Date.now()}`;
+
+    await projectsPage.goto();
+    await projectsPage.createProject(projectName, "Sorting tasks");
+
+    // Setup tasks
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: task_6_MonthAhead,
+      project: projectName,
+      dueDate: date6Month,
+    });
+    await taskModal.submitCreate();
+
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: task_1_MonthAhead,
+      project: projectName,
+      dueDate: date1Month,
+    });
+    await taskModal.submitCreate();
+
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: task_2_MonthAhead,
+      project: projectName,
+      dueDate: date2Month,
+    });
+    await taskModal.submitCreate();
+
+    // Hide seeded data
+    await tasksPage.searchTask(projectName);
+
+    // Sort Ascending
+    await tasksPage.clickSortHeader("sort-dueDate");
+    let sortedTasks = await tasksPage.getSortedTaskTitles();
+    expect(sortedTasks).toEqual([
+      task_1_MonthAhead,
+      task_2_MonthAhead,
+      task_6_MonthAhead,
+    ]);
+
+    // Sort Descending
+    await tasksPage.clickSortHeader("sort-dueDate");
+    sortedTasks = await tasksPage.getSortedTaskTitles();
+    expect(sortedTasks).toEqual([
+      task_6_MonthAhead,
+      task_2_MonthAhead,
+      task_1_MonthAhead,
+    ]);
+  });
+
+  test("Sort tasks by creation date", async ({ page }) => {
+    const projectName = `Sort Project ${Date.now()}`;
+    testProjects.push(projectName);
+
+    const taskFirst = `First Task ${Date.now()}`;
+    const taskSecond = `Second Task ${Date.now()}`;
+    const taskThird = `Third Task ${Date.now()}`;
+
+    await projectsPage.goto();
+    await projectsPage.createProject(projectName, "Sorting tasks");
+
+    // Setup tasks
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskFirst,
+      project: projectName,
+    });
+    await taskModal.submitCreate();
+    await page.waitForTimeout(1000);
+
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskSecond,
+      project: projectName,
+    });
+    await taskModal.submitCreate();
+    await page.waitForTimeout(1000);
+
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.fillTaskDetails({
+      title: taskThird,
+      project: projectName,
+    });
+    await taskModal.submitCreate();
+    await page.waitForTimeout(1000);
+
+    // Hide seeded data
+    await tasksPage.searchTask(projectName);
+
+    // Sort Ascending (Oldest to Newest)
+    await tasksPage.clickSortHeader("sort-createdAt");
+    let sortedTasks = await tasksPage.getSortedTaskTitles();
+    expect(sortedTasks).toEqual([taskFirst, taskSecond, taskThird]);
+
+    // Sort Ascending (Newest to Oldest)
+    await tasksPage.clickSortHeader("sort-createdAt");
+    sortedTasks = await tasksPage.getSortedTaskTitles();
+    expect(sortedTasks).toEqual([taskThird, taskSecond, taskFirst]);
   });
 
   test.afterEach(async ({ page }) => {

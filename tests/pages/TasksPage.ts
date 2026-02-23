@@ -67,4 +67,15 @@ export class TasksPage {
     await this.page.getByRole("checkbox", { name: name }).uncheck();
     await this.page.waitForTimeout(500);
   }
+
+  async clickSortHeader(testId: string) {
+    await this.page.getByTestId(testId).click();
+    await this.page.waitForTimeout(500);
+  }
+
+  async getSortedTaskTitles() {
+    return this.tasksTableBody
+      .locator("td:first-child .font-medium")
+      .allInnerTexts();
+  }
 }
