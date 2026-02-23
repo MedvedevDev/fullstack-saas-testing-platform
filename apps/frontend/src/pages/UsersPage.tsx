@@ -114,6 +114,7 @@ const UsersPage = () => {
           <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
+              aria-label="Search users"
               type="text"
               placeholder="Search..."
               className="pl-9 pr-4 py-2 border border-flow-border rounded-lg text-sm w-full sm:w-64 focus:ring-2 focus:ring-flow-blue/20 outline-none"
@@ -212,6 +213,7 @@ const UsersPage = () => {
                     <td className="px-6 py-4 text-right">
                       {currentUserRole === "ADMIN" && (
                         <button
+                          aria-label="Delete User"
                           onClick={() => handleDelete(user.id)}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                           title="Delete User"

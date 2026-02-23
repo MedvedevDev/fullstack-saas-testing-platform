@@ -10,6 +10,7 @@ export class UsersPage {
   readonly userEmailInput: Locator;
   readonly userRole: Locator;
   readonly createButton: Locator;
+  readonly usersTableBody: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -23,6 +24,8 @@ export class UsersPage {
     this.createButton = page
       .locator("form")
       .getByRole("button", { name: /create user/i });
+
+    this.usersTableBody = page.locator("tbody");
   }
 
   /**
@@ -37,7 +40,12 @@ export class UsersPage {
   /**
    * ### Creates a new user
    */
-  async createUser(name: string, lastName: string, email: string) {
+  async createUser(
+    name: string,
+    lastName: string,
+    email: string,
+    role: string,
+  ) {
     await this.createUserButton.click();
     await expect(this.userNameInput).toBeVisible();
 
@@ -45,9 +53,34 @@ export class UsersPage {
     await this.userLastnameInput.fill(lastName);
     await this.userPasswordInput.fill("TestPass123!");
     await this.userEmailInput.fill(email);
-    await this.userRole.selectOption({ value: "VIEWER" });
+    await this.userRole.selectOption({ value: role });
 
     await this.createButton.click();
     await expect(this.createButton).toBeHidden();
+  }
+
+  /**
+   * Search by name and email
+   */
+  async searchUser(text: string) {
+    await this.page.getByRole("textbox", { name: /Search users/i }).fill(text);
+    await this.page.waitForTimeout(500);
+  }
+
+  async verifyUserVisible(email: string) {
+    const row = this.usersTableBody.getByRole("row").filter({ hasText: email });
+    await expect(row).toBeVisible();
+  }
+
+  /**
+   * Finds a user by email and deletes
+   */
+  async deleteUser(email: string) {
+    const row = this.usersTableBody.getByRole("row").filter({ hasText: email });
+    const deleteButton = row.getByRole("button", { name: /delete user/i });
+    this.page.once("dialog", (dialog) => dialog.accept());
+
+    await deleteButton.click();
+    await this.page.waitForTimeout(500);
   }
 }

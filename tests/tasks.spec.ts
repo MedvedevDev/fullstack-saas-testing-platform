@@ -10,13 +10,18 @@ function getFutureDate(monthsAhead: number): string {
   return date.toISOString().split("T")[0];
 }
 
+/**
+ * Tasks Module Tests.
+ * Covers the lifecycle of tasks: Create, Read (List), Update, Delete, Filtering, Sorting.
+ * Uses Global Setup for authentication state.
+ */
 test.describe("Global Tasks Page", () => {
   test.setTimeout(120000);
   let taskModal: TaskModal;
   let tasksPage: TasksPage;
   let projectsPage: ProjectsPage;
   let usersPage: UsersPage;
-  let testProjects: string[] = []; // projects array to delete clean up
+  let testProjects: string[] = []; // projects array to  clean up
 
   test.beforeEach(async ({ page }) => {
     taskModal = new TaskModal(page);
@@ -106,7 +111,7 @@ test.describe("Global Tasks Page", () => {
 
     // Create the user
     await usersPage.goto();
-    await usersPage.createUser(firstName, lastName, email);
+    await usersPage.createUser(firstName, lastName, email, "VIEWER");
 
     // Create the task
     await tasksPage.goto();
@@ -542,10 +547,6 @@ test.describe("Global Tasks Page", () => {
   test.afterEach(async ({ page }) => {
     const projectsPage = new ProjectsPage(page);
     await projectsPage.goto();
-
-    const allProjectTitles = await page
-      .getByRole("heading", { level: 3 })
-      .allInnerTexts();
 
     // Delete all test projects
     for (const name of testProjects) {
