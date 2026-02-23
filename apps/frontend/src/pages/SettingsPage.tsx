@@ -5,6 +5,7 @@ import api from "../api/axios";
 const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Profile State
   const [profile, setProfile] = useState({
@@ -34,6 +35,7 @@ const SettingsPage = () => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg("");
+    setErrorMsg(""); // Clear old errors
 
     try {
       const payload: any = {
@@ -43,12 +45,12 @@ const SettingsPage = () => {
 
       if (passwords.newPassword) {
         if (passwords.newPassword !== passwords.confirmPassword) {
-          alert("Passwords do not match!");
+          setErrorMsg("Passwords do not match!");
           setLoading(false);
           return;
         }
         if (passwords.newPassword.length < 6) {
-          alert("Password must be at least 6 characters.");
+          setErrorMsg("Password must be at least 6 characters.");
           setLoading(false);
           return;
         }
@@ -60,7 +62,7 @@ const SettingsPage = () => {
       setPasswords({ newPassword: "", confirmPassword: "" });
     } catch (err) {
       console.error("Failed to update", err);
-      alert("Failed to update profile.");
+      setErrorMsg("Failed to update profile.");
     } finally {
       setLoading(false);
     }
@@ -92,10 +94,14 @@ const SettingsPage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-flow-text-muted uppercase mb-1">
+              <label
+                htmlFor="firstName"
+                className="block text-xs font-bold text-flow-text-muted uppercase mb-1"
+              >
                 First Name
               </label>
               <input
+                id="firstName"
                 required
                 className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
                 value={profile.firstName}
@@ -105,10 +111,14 @@ const SettingsPage = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-flow-text-muted uppercase mb-1">
+              <label
+                htmlFor="lastName"
+                className="block text-xs font-bold text-flow-text-muted uppercase mb-1"
+              >
                 Last Name
               </label>
               <input
+                id="lastName"
                 required
                 className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
                 value={profile.lastName}
@@ -120,10 +130,14 @@ const SettingsPage = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-flow-text-muted uppercase mb-1">
+            <label
+              htmlFor="email"
+              className="block text-xs font-bold text-flow-text-muted uppercase mb-1"
+            >
               Email Address
             </label>
             <input
+              id="email"
               disabled
               className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
               value={profile.email}
@@ -145,10 +159,14 @@ const SettingsPage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-flow-text-muted uppercase mb-1">
+              <label
+                htmlFor="newPassword"
+                className="block text-xs font-bold text-flow-text-muted uppercase mb-1"
+              >
                 New Password
               </label>
               <input
+                id="newPassword"
                 type="password"
                 placeholder="Leave blank to keep current"
                 className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
@@ -159,10 +177,14 @@ const SettingsPage = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-flow-text-muted uppercase mb-1">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-xs font-bold text-flow-text-muted uppercase mb-1"
+              >
                 Confirm Password
               </label>
               <input
+                id="confirmPassword"
                 type="password"
                 placeholder="Confirm new password"
                 className="w-full p-2.5 border border-flow-border rounded-lg text-sm bg-gray-50 text-flow-text-main focus:bg-white focus:ring-2 focus:ring-flow-blue/20 outline-none transition-all"
@@ -180,13 +202,18 @@ const SettingsPage = () => {
 
         {/* Actions */}
         <div className="pt-4 flex items-center justify-between">
-          {successMsg ? (
-            <span className="text-green-600 text-sm font-bold animate-in fade-in">
-              {successMsg}
-            </span>
-          ) : (
-            <span></span>
-          )}
+          <div className="flex-1">
+            {successMsg && (
+              <span className="text-green-600 text-sm font-bold animate-in fade-in">
+                {successMsg}
+              </span>
+            )}
+            {errorMsg && (
+              <span className="text-red-600 text-sm font-bold animate-in fade-in">
+                {errorMsg}
+              </span>
+            )}
+          </div>
 
           <button
             type="submit"
