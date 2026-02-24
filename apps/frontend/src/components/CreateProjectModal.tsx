@@ -45,7 +45,11 @@ const CreateProjectModal = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 space-y-4"
+          data-testid="create-project-modal"
+        >
           <div>
             <label className="block text-xs font-bold text-flow-text-muted uppercase mb-1 tracking-wider">
               Project Name
@@ -53,6 +57,7 @@ const CreateProjectModal = ({
             <input
               data-testid="project-name-input"
               required
+              maxLength={90}
               placeholder="e.g., Marketing Campaign"
               className="w-full p-2.5 border border-flow-border rounded-lg text-sm focus:ring-2 focus:ring-flow-blue/20 focus:border-flow-blue outline-none transition-all"
               value={formData.name}

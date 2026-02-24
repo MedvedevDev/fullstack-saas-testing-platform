@@ -3,12 +3,7 @@ import { TaskModal } from "./pages/TaskModal";
 import { TasksPage } from "./pages/TasksPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { UsersPage } from "./pages/UsersPage";
-
-function getFutureDate(monthsAhead: number): string {
-  const date = new Date();
-  date.setMonth(date.getMonth() + monthsAhead);
-  return date.toISOString().split("T")[0];
-}
+import { getFutureDate } from "../utils/date-utils";
 
 /**
  * Tasks Module Tests.

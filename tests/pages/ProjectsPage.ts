@@ -1,5 +1,5 @@
 import { Page, Locator, expect } from "@playwright/test";
-import { waitForDebugger } from "node:inspector";
+import { SidebarComponent } from "../components/SidebarComponent";
 
 export interface ProjectUpdates {
   name?: string;
@@ -14,6 +14,8 @@ export interface ProjectUpdates {
  */
 export class ProjectsPage {
   readonly page: Page;
+  readonly sidebar: SidebarComponent;
+
   readonly createProjectButton: Locator;
   readonly projectNameInput: Locator;
   readonly projectDescInput: Locator;
@@ -26,9 +28,13 @@ export class ProjectsPage {
   readonly saveChangesButton: Locator;
   readonly searchInput: Locator;
   readonly filterButton: Locator;
+  readonly createProjectModal: Locator;
+  readonly cancelSubmitButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
+    this.sidebar = new SidebarComponent(page);
+
     this.createProjectButton = page.getByRole("button", {
       name: /new project/i,
     });
@@ -36,9 +42,11 @@ export class ProjectsPage {
     this.searchInput = page.getByPlaceholder("Search projects...");
     this.filterButton = page.getByTestId("status-dropdown");
     // Create Project Modal fields
+    this.createProjectModal = page.getByTestId("create-project-modal");
     this.projectNameInput = page.getByTestId("project-name-input");
     this.projectDescInput = page.getByTestId("project-name-desc");
     this.submitButton = page.getByRole("button", { name: /create project/i });
+    this.cancelSubmitButton = page.getByRole("button", { name: /cancel/i });
     // Edit Project Modal fields
     this.projectNameInputUpdate = page.getByLabel(/project name/i);
     this.projectDescInputUpdate = page.getByLabel(/description/i);
@@ -180,7 +188,7 @@ export class ProjectsPage {
 
     // Type the search term
     await this.searchInput.fill(searchTerm);
-    await this.page.waitForTimeout(500);
+    await expect(this.projectsList.getByRole("link").first()).toBeVisible();
     // Verify the expected projects are displayed
     const allTitles = await this.projectsList
       .getByRole("link")

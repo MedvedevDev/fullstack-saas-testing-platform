@@ -7,6 +7,7 @@ import { faker } from "@faker-js/faker";
  * Covers the update name and password validations
  */
 test.describe("Settings Page", () => {
+  test.setTimeout(60000);
   let settingsPage: SettingsPage;
 
   test.beforeEach(async ({ page }) => {

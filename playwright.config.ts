@@ -11,22 +11,22 @@ export default defineConfig({
   reporter: process.env.CI ? "blob" : "html",
   use: {
     baseURL,
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
   },
-  webServer: [
-    {
-      command: "npm run dev",
-      cwd: "apps/backend",
-      url: "http://localhost:3001/api/health",
-      reuseExistingServer: !process.env.CI,
-    },
-    {
-      command: `npm run dev -- --port ${port}`,
-      cwd: "apps/frontend",
-      reuseExistingServer: !process.env.CI,
-      url: baseURL,
-    },
-  ],
+  // webServer: [
+  //   {
+  //     command: "npm run dev",
+  //     cwd: "apps/backend",
+  //     url: "http://localhost:3001/api/health",
+  //     reuseExistingServer: !process.env.CI,
+  //   },
+  //   {
+  //     command: `npm run dev -- --port ${port}`,
+  //     cwd: "apps/frontend",
+  //     reuseExistingServer: !process.env.CI,
+  //     url: baseURL,
+  //   },
+  // ],
   /* Configure projects for major browsers */
   projects: [
     {
