@@ -10,7 +10,7 @@ import { getFutureDate } from "../utils/date-utils";
  * Covers the lifecycle of tasks: Create, Read (List), Update, Delete, Filtering, Sorting.
  * Uses Global Setup for authentication state.
  */
-test.describe("Global Tasks Page", () => {
+test.describe("Global Tasks Page @regression", () => {
   test.setTimeout(120000);
   let taskModal: TaskModal;
   let tasksPage: TasksPage;
@@ -26,7 +26,7 @@ test.describe("Global Tasks Page", () => {
     testProjects = [];
   });
 
-  test("Search task  by name", async ({ page }) => {
+  test("Search task  by name @tasks", async ({ page }) => {
     const projectName = `Search Project ${Date.now()}`;
     testProjects.push(projectName);
     const taskFindMe = `Find Me Task ${Date.now()}`;
@@ -59,7 +59,7 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.verifyAllRows(["Find Me"]);
   });
 
-  test("Search task  by project", async ({ page }) => {
+  test("Search task  by project @tasks", async ({ page }) => {
     const projectName = `Search Project ${Date.now()}`;
     testProjects.push(projectName);
     const taskFindMe = `Find Me Task ${Date.now()}`;
@@ -92,7 +92,7 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.verifyAllRows([projectName]);
   });
 
-  test("Search task by assignee name", async ({ page }) => {
+  test("Search task by assignee name @tasks", async ({ page }) => {
     const projectName = `Search Project by Assignee ${Date.now()}`;
     testProjects.push(projectName);
     const taskFindMe = `Find Me Task ${Date.now()}`;
@@ -126,7 +126,7 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.verifyAllRows([fullName]);
   });
 
-  test("Filter tasks using Dropdowns", async ({ page }) => {
+  test("Filter tasks using Dropdowns @tasks", async ({ page }) => {
     const projectName = `Dropdown Project ${Date.now()}`;
     testProjects.push(projectName);
     const taskHighToDo = "Task High ToDo";
@@ -209,7 +209,7 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.setDropdownFilters("Any Status", "Any Priority");
   });
 
-  test("Filter tasks using Checkboxs", async ({ page }) => {
+  test("Filter tasks using Checkboxs @tasks", async ({ page }) => {
     const projectName = `Dropdown Project ${Date.now()}`;
     testProjects.push(projectName);
     const taskHighToDo = "Checkbox High ToDo";
@@ -324,7 +324,7 @@ test.describe("Global Tasks Page", () => {
     await tasksPage.untoggleCheckbox("To Do");
   });
 
-  test("Edit and Delete a Task", async ({ page }) => {
+  test("Edit and Delete a Task @smoke @tasks", async ({ page }) => {
     const projectName = `Project To Edit And Delete ${Date.now()}`;
     testProjects.push(projectName);
     const taskName = "Task to Edit";
@@ -369,7 +369,7 @@ test.describe("Global Tasks Page", () => {
     await expect(updatedRow).toBeHidden();
   });
 
-  test("Sort tasks by Status", async ({ page }) => {
+  test("Sort tasks by Status @tasks", async ({ page }) => {
     const projectName = `Sort Project ${Date.now()}`;
     testProjects.push(projectName);
 
@@ -420,7 +420,7 @@ test.describe("Global Tasks Page", () => {
     expect(sortedTasks).toEqual([taskToDo, taskInProgress, taskDone]);
   });
 
-  test("Sort tasks by Due Date", async ({ page }) => {
+  test("Sort tasks by Due Date @tasks", async ({ page }) => {
     // Generate  future dates
     const date1Month = getFutureDate(1);
     const date2Month = getFutureDate(2);
@@ -486,7 +486,7 @@ test.describe("Global Tasks Page", () => {
     ]);
   });
 
-  test("Sort tasks by creation date", async ({ page }) => {
+  test("Sort tasks by creation date @tasks", async ({ page }) => {
     const projectName = `Sort Project ${Date.now()}`;
     testProjects.push(projectName);
 
@@ -539,13 +539,72 @@ test.describe("Global Tasks Page", () => {
     expect(sortedTasks).toEqual([taskThird, taskSecond, taskFirst]);
   });
 
-  test.afterEach(async ({ page }) => {
-    const projectsPage = new ProjectsPage(page);
-    await projectsPage.goto();
+  test("create a task with empty title @tasks @negative", async ({ page }) => {
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    // Submit the form with empty field
+    await taskModal.createButton.click();
 
+    // Verify that the project is not created when Project name field is empty
+    await expect(taskModal.titleInput).toBeVisible();
+    const validationMessage = await taskModal.titleInput.evaluate((element) => {
+      return (element as HTMLInputElement).validationMessage;
+    });
+    expect(validationMessage).not.toBe("");
+  });
+
+  test("create a task with empty Project @tasks @negative", async ({}) => {
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.titleInput.fill("Task Is Not Created");
+    // Submit the form with empty project
+    await taskModal.createButton.click();
+
+    // Verify that the project is not created when Project name field is empty
+    await expect(taskModal.titleInput).toBeVisible();
+    const validationMessage = await taskModal.projectSelect.evaluate(
+      (element) => {
+        return (element as HTMLInputElement).validationMessage;
+      },
+    );
+    expect(validationMessage).not.toBe("");
+  });
+
+  test("cancel task creation and verify fields clear @tasks @negative", async ({}) => {
+    const taskName = `Test Cancelled Task ${Date.now()}`;
+    const projectName = `Search Project ${Date.now()}`;
+    testProjects.push(projectName);
+    await projectsPage.goto();
+    await projectsPage.createProject(projectName, "Testing search");
+
+    await tasksPage.goto();
+    await tasksPage.createTaskButton.click();
+    await taskModal.titleInput.fill(taskName);
+    await taskModal.projectSelect.selectOption({ label: projectName });
+    // Cancel task creation
+    await taskModal.cancelButton.click();
+    await expect(taskModal.titleInput).toBeHidden();
+    // Verify that task is not created
+    const row = tasksPage.tasksTableBody
+      .getByRole("row")
+      .filter({ hasText: taskName });
+    await expect(row).toBeHidden();
+
+    // Reopen the modal and verify fields are empty
+    await tasksPage.createTaskButton.click();
+    await expect(taskModal.titleInput).toBeVisible();
+    await expect(taskModal.titleInput).toHaveValue("");
+    await expect(taskModal.descriptionInput).toHaveValue("");
+  });
+
+  test.afterEach(async ({ page }) => {
     // Delete all test projects
-    for (const name of testProjects) {
-      await projectsPage.deleteProject(name);
+    if (testProjects.length > 0) {
+      const projectsPage = new ProjectsPage(page);
+      await projectsPage.goto();
+      for (const name of testProjects) {
+        await projectsPage.deleteProject(name);
+      }
     }
   });
 });

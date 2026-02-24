@@ -6,7 +6,7 @@ import { UsersPage } from "./pages/UsersPage";
  * Covers the Create, Read (List), Delete and Search.
  * Uses Global Setup for authentication state.
  */
-test.describe("Users Page", () => {
+test.describe("Users Page @regression", () => {
   let usersPage: UsersPage;
   let testEmails: string[] = [];
 

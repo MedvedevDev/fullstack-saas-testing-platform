@@ -7,7 +7,7 @@ import { getTodayDate } from "../utils/date-utils";
  * Covers the lifecycle of projects: Create, Read (List), Update, Delete.
  * Uses Global Setup for authentication state.
  */
-test.describe("Projects Module", () => {
+test.describe("Projects Module @regression", () => {
   let projectsPage: ProjectsPage;
   let projectName: string | null = null;
 
@@ -123,7 +123,7 @@ test.describe("Projects Module", () => {
     await expect(projectsPage.createProjectModal).toBeVisible();
   });
 
-  test("cancel project creation and verify fields are clear @projects @negative", async ({}) => {
+  test("cancel project creation and verify fields clear @projects @negative", async ({}) => {
     const name = `Project Name ${Date.now()}`;
     const descripion = `Descr ${Date.now()}`;
 

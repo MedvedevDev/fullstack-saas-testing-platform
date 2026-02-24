@@ -3,7 +3,7 @@ import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectDetailsPage } from "./pages/ProjectDetailsPage";
 import { TaskModal } from "./pages/TaskModal";
 
-test.describe("Project Details Module", () => {
+test.describe("Project Details Module @regression", () => {
   let projectsPage: ProjectsPage;
   let detailsPage: ProjectDetailsPage;
 

@@ -6,7 +6,7 @@ import { faker } from "@faker-js/faker";
  * Settings Module Tests.
  * Covers the update name and password validations
  */
-test.describe("Settings Page", () => {
+test.describe("Settings Page @regression", () => {
   test.setTimeout(60000);
   let settingsPage: SettingsPage;
 

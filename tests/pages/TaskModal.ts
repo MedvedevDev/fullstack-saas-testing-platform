@@ -11,6 +11,7 @@ export class TaskModal {
   readonly createButton: Locator;
   readonly saveButton: Locator;
   readonly projectSelect: Locator;
+  readonly cancelButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -28,6 +29,7 @@ export class TaskModal {
     this.saveButton = page
       .locator("form")
       .getByRole("button", { name: /save changes/i });
+    this.cancelButton = page.getByRole("button", { name: /cancel/i });
   }
 
   /**
