@@ -15,11 +15,11 @@ test.describe("Settings Page @regression", () => {
     await settingsPage.goto();
   });
 
-  test("Verify email field is disabled", async () => {
+  test("Verify email field is disabled @settings", async () => {
     await expect(settingsPage.emailInput).toBeDisabled();
   });
 
-  test("Update profile name", async ({ page }) => {
+  test("Update profile name @settings", async ({ page }) => {
     const newName = faker.person.firstName();
     const newLastName = faker.person.lastName();
 
@@ -33,21 +33,21 @@ test.describe("Settings Page @regression", () => {
     );
   });
 
-  test("Fail to update with mismatched passwords", async () => {
+  test("Update with mismatched passwords @negative @settings", async () => {
     await settingsPage.newPasswordInput.fill("password123");
     await settingsPage.confirmPasswordInput.fill("wrongpassword");
     await settingsPage.saveButton.click();
 
-    // Verify the alert caught the mismatch
+    // Verify the alert is shown
     await expect(settingsPage.failedMessage).toBeVisible();
   });
 
-  test("Fail to update with short passwords", async () => {
+  test("Update with short passwords @negative @settings", async () => {
     await settingsPage.newPasswordInput.fill("111");
     await settingsPage.confirmPasswordInput.fill("111");
     await settingsPage.saveButton.click();
 
-    // Verify the alert caught the mismatch
+    // Verify the alert is shown
     await expect(settingsPage.shortPasswordMessage).toBeVisible();
   });
 });

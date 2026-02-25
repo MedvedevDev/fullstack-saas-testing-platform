@@ -27,7 +27,7 @@ test.describe("Project Details Module @regression", () => {
   });
 });
 
-test.describe("Tasks List on the Projects Details page", () => {
+test.describe("Tasks List on the Projects Details page @regression", () => {
   let projectsPage: ProjectsPage;
   let detailsPage: ProjectDetailsPage;
   let taskModal: TaskModal;

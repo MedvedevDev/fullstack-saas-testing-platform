@@ -16,7 +16,7 @@ test.describe("Users Page @regression", () => {
     await usersPage.goto();
   });
 
-  test("Test create VIEWER user", async ({ page }) => {
+  test("Test create VIEWER user @smoke @users", async ({ page }) => {
     const firstName = "User";
     const lastName = "Viewer";
     const email = `email${Date.now()}@gma2il.com`;
@@ -31,7 +31,7 @@ test.describe("Users Page @regression", () => {
     await expect(row.filter({ hasText: "VIEWER" })).toBeVisible();
   });
 
-  test("Test create ADMIN user", async ({ page }) => {
+  test("Test create ADMIN user @users", async ({ page }) => {
     const firstName = "User";
     const lastName = "Admin";
     const email = `email${Date.now()}@gma2il.com`;
@@ -46,7 +46,7 @@ test.describe("Users Page @regression", () => {
     await expect(row.filter({ hasText: "ADMIN" })).toBeVisible();
   });
 
-  test("Test create MANAGER user", async ({ page }) => {
+  test("Test create MANAGER user @users", async ({ page }) => {
     const firstName = "User";
     const lastName = "Manager";
     const email = `email${Date.now()}@gma2il.com`;
@@ -61,7 +61,7 @@ test.describe("Users Page @regression", () => {
     await expect(row.filter({ hasText: "MANAGER" })).toBeVisible();
   });
 
-  test("Search for a specific user by first and last name", async ({
+  test("Search for a specific user by first and last name @users", async ({
     page,
   }) => {
     const firstName = "Find";
@@ -80,7 +80,7 @@ test.describe("Users Page @regression", () => {
     await expect(row).toHaveCount(1);
   });
 
-  test("Search for a specific user by email", async ({ page }) => {
+  test("Search for a specific user by email @users", async ({ page }) => {
     const firstName = "User";
     const lastName = "Manager";
     const email = `email${Date.now()}@gma2il.com`;
@@ -97,7 +97,7 @@ test.describe("Users Page @regression", () => {
     await expect(row).toHaveCount(1);
   });
 
-  test("Delete user", async ({ page }) => {
+  test("Delete user @smoke @users", async ({ page }) => {
     const firstName = "User";
     const lastName = "Manager";
     const email = `email${Date.now()}@gma2il.com`;
@@ -112,6 +112,44 @@ test.describe("Users Page @regression", () => {
       .getByRole("row")
       .filter({ hasText: email });
     await expect(row).toBeHidden();
+  });
+
+  test("Сreate a user with an empty name @users @negative", async ({
+    page,
+  }) => {
+    await usersPage.createUserButton.click();
+    await usersPage.createButton.click();
+
+    // Verify that the  user is not created
+    // Verify native warning is shown
+    await expect(usersPage.createButton).toBeVisible();
+    const validationMessage = await usersPage.userNameInput.evaluate(
+      (element) => {
+        return (element as HTMLInputElement).validationMessage;
+      },
+    );
+    expect(validationMessage).not.toBe("");
+  });
+
+  test("Create user with invalid email @users @negative", async ({ page }) => {
+    await usersPage.createUserButton.click();
+    await expect(usersPage.userNameInput).toBeVisible();
+
+    await usersPage.userNameInput.fill("Invalid");
+    await usersPage.userLastnameInput.fill("EmailUser");
+    await usersPage.userPasswordInput.fill("TestPass123!");
+    await usersPage.userEmailInput.fill("invalid-email-format");
+    await usersPage.userRole.selectOption({ value: "VIEWER" });
+
+    await usersPage.createButton.click();
+
+    // Verify modal is still open
+    await expect(usersPage.createButton).toBeVisible();
+    // Verify native warning is shown
+    const validationMessage = await usersPage.userEmailInput.evaluate(
+      (element) => (element as HTMLInputElement).validationMessage,
+    );
+    expect(validationMessage).not.toBe("");
   });
 
   test.afterEach(async () => {
