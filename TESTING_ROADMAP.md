@@ -31,7 +31,7 @@
   - [ ] **Profile Update:** A user updates their password and name. Verify they can log in with the new credentials and see the updated name.
   - [ ] **Dashboard Data Consistency:** Create specific projects and tasks (e.g., 1 Active, 2 Completed). Verify Dashboard counters/charts match exactly.
   - [ ] **Dashboard Empty State:** Login as a new user. Verify Dashboard shows correct "0 Projects" state and "Get Started" prompts.
-  - [ ] **API Authorization:** A `VIEWER` attempts to delete a project via API directly. Verify 403 Forbidden.
+  - [x] **API Authorization:** A `VIEWER` attempts to delete a project via API directly. Verify 403 Forbidden.
   - [ ] **Direct URL Access:** A `VIEWER` tries to navigate to `/users` (Admin only page). Verify redirection to Dashboard or Error page.
   - [ ] **Orphaned Data Handling:** Assign a task to a user, then delete that user. Verify the task remains but becomes "Unassigned".
   - [ ] **Logout Security:** Verify that clicking "Back" after logout does not reveal the dashboard.

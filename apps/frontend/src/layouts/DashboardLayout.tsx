@@ -28,7 +28,6 @@ const DashboardLayout = () => {
       {/* Main Content Area (Right) */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Header */}
-        {/* FIX 2: Changed 'bg-white' to 'bg-flow-card' so header turns dark too */}
         <header className="h-16 bg-flow-card border-b border-flow-border flex items-center justify-between px-8 shrink-0 transition-colors duration-300">
           <h1 className="font-bold text-xl text-flow-text-main">
             Welcome Back

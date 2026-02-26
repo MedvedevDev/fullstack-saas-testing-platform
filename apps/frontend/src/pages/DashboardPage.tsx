@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api/axios";
-import { DashboardStats } from "../components/DashboardStats"; // Ensure named import
+import { DashboardStats } from "../components/DashboardStats";
 import RecentActivity from "../components/RecentActivity";
 import type { User } from "../types/user";
 

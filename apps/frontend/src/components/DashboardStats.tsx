@@ -45,7 +45,10 @@ const DashboardStats = ({ stats, isViewer = false }: StatsProps) => {
       {/* Metric Cards Column */}
       <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Card 1: Projects */}
-        <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div
+          data-testid="total-projects"
+          className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+        >
           <div className="flex justify-between items-start">
             <div className="p-2 bg-indigo-50 rounded-lg">
               <Layers className="h-6 w-6 text-indigo-600" />
@@ -62,7 +65,10 @@ const DashboardStats = ({ stats, isViewer = false }: StatsProps) => {
         </div>
 
         {/* Card 2: Tasks */}
-        <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div
+          data-testid="active-tasks"
+          className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+        >
           <div className="flex justify-between items-start">
             <div className="p-2 bg-blue-50 rounded-lg">
               <Briefcase className="h-6 w-6 text-blue-600" />
@@ -80,7 +86,10 @@ const DashboardStats = ({ stats, isViewer = false }: StatsProps) => {
 
         {/* Card 3: Team Members (HIDDEN FOR VIEWERS) */}
         {!isViewer && (
-          <div className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow sm:col-span-2">
+          <div
+            data-testid="team-members"
+            className="bg-white p-6 rounded-xl border border-flow-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow sm:col-span-2"
+          >
             <div className="flex justify-between items-start">
               <div className="p-2 bg-orange-50 rounded-lg">
                 <Users className="h-6 w-6 text-orange-600" />
