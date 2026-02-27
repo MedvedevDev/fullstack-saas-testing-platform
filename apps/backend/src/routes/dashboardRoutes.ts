@@ -14,11 +14,21 @@ router.get("/stats", authenticateToken, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.userId;
     const roles = req.user?.roles || [];
-    const isAdminOrManager =
-      roles.includes("ADMIN") || roles.includes("MANAGER");
+    const isAdmin = roles.includes("ADMIN");
+    const isManager = roles.includes("MANAGER");
 
-    // Filter: Viewers only see their own tasks
-    const taskFilter = isAdminOrManager ? {} : { assigneeId: userId };
+    // Task filter remains the same: Admins/Managers see all, Viewers see assigned.
+    const taskFilter = (isAdmin || isManager) ? {} : { assigneeId: userId };
+
+    // Project count is now properly scoped for Managers.
+    let projectWhereClause = {};
+    if (isAdmin) {
+      projectWhereClause = {}; // Admins see all
+    } else if (isManager) {
+      projectWhereClause = { ownerId: userId }; // Managers see their own
+    } else {
+      projectWhereClause = { tasks: { some: { assigneeId: userId } } }; // Viewers see assigned
+    }
 
     const [taskStats, projectCount, userCount, totalTasks] = await Promise.all([
       prisma.task.groupBy({
@@ -27,9 +37,7 @@ router.get("/stats", authenticateToken, async (req: AuthRequest, res) => {
         where: taskFilter,
       }),
       prisma.project.count({
-        where: isAdminOrManager
-          ? {}
-          : { tasks: { some: { assigneeId: userId } } },
+        where: projectWhereClause,
       }),
       prisma.user.count(),
       prisma.task.count({ where: taskFilter }),

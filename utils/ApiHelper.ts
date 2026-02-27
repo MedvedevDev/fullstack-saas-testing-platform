@@ -171,16 +171,26 @@ export class ApiHelper {
     taskId: string,
     data: { title?: string; status?: string; priority?: string },
   ) {
-    const response = await this.request.patch(
-      `${this.baseUrl}/tasks/${taskId}`,
-      {
-        data,
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
+    const response = await this.request.put(`${this.baseUrl}/tasks/${taskId}`, {
+      data,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
       },
-    );
+    });
     expect(response.status()).toEqual(200);
+    return await response.json();
+  }
+
+  /**
+   * Fetches the dashboard statistics
+   */
+  async getDashboardStats() {
+    const response = await this.request.get(`${this.baseUrl}/dashboard/stats`, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+    expect(response.status()).toBe(200);
     return await response.json();
   }
 }
