@@ -51,7 +51,7 @@ export class UsersPage {
 
     await this.userNameInput.fill(name);
     await this.userLastnameInput.fill(lastName);
-    await this.userPasswordInput.fill("TestPass123!");
+    await this.userPasswordInput.fill("password123");
     await this.userEmailInput.fill(email);
     await this.userRole.selectOption({ value: role });
 

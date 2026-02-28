@@ -227,4 +227,30 @@ export class ApiHelper {
     expect(response.status()).toEqual(200);
     return await response.json();
   }
+
+  /**
+   * Fetches a list of projects
+   */
+  async getProjects() {
+    const response = await this.request.get(`${this.baseUrl}/projects`, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+    expect(response.status()).toEqual(200);
+    return await response.json();
+  }
+
+  /**
+   * Fetches a list of tasks
+   */
+  async getUsers() {
+    const response = await this.request.get(`${this.baseUrl}/users`, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+    expect(response.status()).toEqual(200);
+    return await response.json();
+  }
 }
