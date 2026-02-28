@@ -21,10 +21,9 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Starting Realistic Database Seed...");
+  console.log("🌱 Starting Tiny Seed...");
 
   // 1. Cleanup
-  // Deleting logs first to avoid foreign key constraints
   await prisma.activityLog.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.task.deleteMany();
@@ -40,144 +39,92 @@ async function main() {
 
   const passwordHash = await bcrypt.hash("password123", 10);
 
-  // -------------------------
-  // 3. Create Users
-  // -------------------------
-
-  // A. One Admin
+  // 3. Create Admin
   const admin = await prisma.user.create({
     data: {
       email: "admin@flowdash.com",
       passwordHash,
-      firstName: "Admin",
+      firstName: "ADMIN",
       lastName: "User",
       roles: { connect: { id: roleAdmin.id } },
     },
   });
-  console.log(`Created Admin: ${admin.email}`);
 
-  // B. Three Managers (Realistic Names)
-  const managers = [];
-  for (let i = 0; i < 3; i++) {
-    const firstName = faker.person.firstName();
-    const lastName = faker.person.lastName();
-    const manager = await prisma.user.create({
-      data: {
-        email: `manager${i + 1}@flowdash.com`,
-        passwordHash,
-        firstName,
-        lastName,
-        roles: { connect: { id: roleManager.id } },
-      },
-    });
-    managers.push(manager);
-  }
-  console.log(`Created 3 Managers`);
+  // 4. Create 2 Managers
+  const manager1 = await prisma.user.create({
+    data: {
+      email: "manager1@flowdash.com",
+      passwordHash,
+      firstName: "Manager",
+      lastName: "1",
+      roles: { connect: { id: roleManager.id } },
+    },
+  });
+  const manager2 = await prisma.user.create({
+    data: {
+      email: "manager2@flowdash.com",
+      passwordHash,
+      firstName: "Manager",
+      lastName: "2",
+      roles: { connect: { id: roleManager.id } },
+    },
+  });
 
-  // C. 20 Viewers
+  // 5. Create 4 Viewers
   const viewers = [];
-  for (let i = 0; i < 20; i++) {
-    const firstName = faker.person.firstName();
-    const lastName = faker.person.lastName();
-    // Keep one consistent viewer for testing
-    const email =
-      i === 0
-        ? "viewer1@flowdash.com"
-        : faker.internet.email({
-            firstName,
-            lastName,
-            provider: "flowdash.com",
-          });
-
+  for (let i = 1; i <= 4; i++) {
     const viewer = await prisma.user.create({
       data: {
-        email: email.toLowerCase(),
+        email: `viewer${i}@flowdash.com`,
         passwordHash,
-        firstName,
-        lastName,
+        firstName: "Viewer",
+        lastName: `${i}`,
         roles: { connect: { id: roleViewer.id } },
       },
     });
     viewers.push(viewer);
   }
-  console.log(`Created 20 Viewers`);
 
-  // -------------------------
-  // 4. Create Projects
-  // -------------------------
-  const creators = [admin, ...managers];
-  const projects = [];
+  // 6. Create 1 Project
+  const project = await prisma.project.create({
+    data: {
+      name: "Main Project",
+      description: "Our single test project",
+      status: "ACTIVE",
+      ownerId: admin.id,
+    },
+  });
 
-  // Generate 12 Realistic Projects
-  for (let i = 0; i < 12; i++) {
-    const owner = creators[Math.floor(Math.random() * creators.length)];
-    const status = Math.random() > 0.8 ? "ARCHIVED" : "ACTIVE";
+  // 7. Create Tasks assigned to users
+  await prisma.task.create({
+    data: {
+      title: "Setup Dashboard",
+      projectId: project.id,
+      assigneeId: manager1.id,
+      status: "IN_PROGRESS",
+      priority: "HIGH",
+    },
+  });
+  await prisma.task.create({
+    data: {
+      title: "Fix Login Bug",
+      projectId: project.id,
+      assigneeId: manager2.id,
+      status: "TODO",
+      priority: "MEDIUM",
+    },
+  });
+  await prisma.task.create({
+    data: {
+      title: "Review Docs",
+      projectId: project.id,
+      assigneeId: viewers[0].id,
+      status: "DONE",
+      priority: "LOW",
+    },
+  });
 
-    const project = await prisma.project.create({
-      data: {
-        name: faker.commerce.productName() + " Launch",
-        description: faker.company.catchPhrase(),
-        status,
-        ownerId: owner.id,
-        createdAt: faker.date.past(),
-      },
-    });
-    projects.push(project);
-  }
-  console.log(`Created 12 Projects`);
-
-  // -------------------------
-  // 5. Create Tasks
-  // -------------------------
-  const allUsers = [...managers, ...viewers];
-
-  let taskCount = 0;
-  for (const project of projects) {
-    const tasksPerProject = faker.number.int({ min: 5, max: 10 });
-
-    for (let j = 0; j < tasksPerProject; j++) {
-      const assignee =
-        Math.random() > 0.1
-          ? allUsers[Math.floor(Math.random() * allUsers.length)]
-          : null;
-
-      const status = faker.helpers.arrayElement([
-        "TODO",
-        "IN_PROGRESS",
-        "DONE",
-      ]);
-      const priority = faker.helpers.arrayElement(["LOW", "MEDIUM", "HIGH"]);
-
-      const task = await prisma.task.create({
-        data: {
-          title: faker.hacker.verb() + " " + faker.hacker.noun(),
-          description: faker.lorem.sentence(),
-          status: status as any,
-          priority: priority as any,
-          projectId: project.id,
-          assigneeId: assignee?.id,
-          dueDate: faker.date.future(),
-          createdAt: faker.date.past(),
-        },
-      });
-
-      if (Math.random() > 0.5 && assignee) {
-        await prisma.activityLog.create({
-          data: {
-            action: `TASK_${status}`,
-            entityType: "TASK",
-            entityId: task.id,
-            userId: assignee.id,
-            createdAt: faker.date.recent(),
-          },
-        });
-      }
-      taskCount++;
-    }
-  }
-
-  console.log(`Created ${taskCount} Tasks with random statuses and assignees.`);
-  console.log("✅ Seeding completed successfully.");
+  console.log("✅ Tiny Seeding completed successfully.");
 }
 
 main()

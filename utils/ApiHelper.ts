@@ -145,13 +145,14 @@ export class ApiHelper {
    * @param projectId - The ID of the parent project
    * @param title - Task title
    */
-  async createTask(projectId: string, title: string) {
+  async createTask(projectId: string, title: string, assigneeId?: string) {
     const response = await this.request.post(`${this.baseUrl}/tasks`, {
       data: {
         title,
         status: "TODO",
         priority: "HIGH",
         projectId,
+        assigneeId,
       },
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -163,13 +164,33 @@ export class ApiHelper {
   }
 
   /**
+   * Deletes a task by ID
+   */
+  async deleteTask(taskId: string) {
+    const response = await this.request.delete(
+      `${this.baseUrl}/tasks/${taskId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      },
+    );
+    expect(response.status()).toEqual(204);
+  }
+
+  /**
    * Updates an existing task
    * @param taskId - The UUID of the task
    * @param data - Partial object (title, status, priority)
    */
   async updateTask(
     taskId: string,
-    data: { title?: string; status?: string; priority?: string },
+    data: {
+      title?: string;
+      status?: string;
+      priority?: string;
+      assigneeId?: string;
+    },
   ) {
     const response = await this.request.put(`${this.baseUrl}/tasks/${taskId}`, {
       data,
@@ -191,6 +212,19 @@ export class ApiHelper {
       },
     });
     expect(response.status()).toBe(200);
+    return await response.json();
+  }
+
+  /**
+   * Fetches a list of tasks
+   */
+  async getTasks() {
+    const response = await this.request.get(`${this.baseUrl}/tasks`, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+    expect(response.status()).toEqual(200);
     return await response.json();
   }
 }

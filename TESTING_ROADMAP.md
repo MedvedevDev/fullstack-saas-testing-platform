@@ -17,28 +17,36 @@
 - [x] Create reusable helper functions (e.g., a custom `login` command).
 - [x] Develop a strategy for creating and cleaning up test data.
 
-**Phase 4: Advanced Testing & Reporting (Current)**
+## 🔵 Phase 4: Advanced Testing & E2E Flows
 
-- [ ] **E2E Flows:** Testing the full journey.
-  - [ ] **Admin Onboarding:** An Admin creates a new `MANAGER` user and a new `PROJECT`.
-  - [ ] **Manager Project Setup:** A `MANAGER` logs in, creates several `TASKS` within their project, and assigns them to other users.
-  - [ ] **Viewer Task Completion:** A `VIEWER` logs in, finds an assigned task on the global tasks page, and updates its status to "Done".
-  - [ ] **Full Lifecycle:** A single test that follows a task from creation by an Admin, assignment to a Viewer, completion by the Viewer, and final verification by the Admin.
-  - [ ] **RBAC Security Check:** Verify that a `VIEWER` cannot access the Users page or create projects via direct URL navigation.
-  - [ ] **Task Re-assignment:** A `MANAGER` re-assigns a task from User A to User B. Verify User A loses access and User B gains access.
-  - [ ] **Project Deletion Cascade:** Create a project with tasks, then delete the project. Verify all associated tasks are removed from the Global Tasks view.
-  - [ ] **User Role Promotion:** An `ADMIN` promotes a `VIEWER` to `MANAGER`. Verify the user gains "Create Project" capabilities after re-login.
-  - [ ] **Profile Update:** A user updates their password and name. Verify they can log in with the new credentials and see the updated name.
-  - [ ] **Dashboard Data Consistency:** Create specific projects and tasks (e.g., 1 Active, 2 Completed). Verify Dashboard counters/charts match exactly.
-  - [ ] **Dashboard Empty State:** Login as a new user. Verify Dashboard shows correct "0 Projects" state and "Get Started" prompts.
-  - [x] **API Authorization:** A `VIEWER` attempts to delete a project via API directly. Verify 403 Forbidden.
-  - [ ] **Direct URL Access:** A `VIEWER` tries to navigate to `/users` (Admin only page). Verify redirection to Dashboard or Error page.
-  - [ ] **Orphaned Data Handling:** Assign a task to a user, then delete that user. Verify the task remains but becomes "Unassigned".
-  - [ ] **Logout Security:** Verify that clicking "Back" after logout does not reveal the dashboard.
-- [ ] **API Testing:** Verifying the backend directly.
-- [ ] **Visual Regression:** Ensuring the UI doesn't look "broken" after updates.
-- [ ] Implement accessibility checks.
-- [ ] Configure advanced reporting for test results.
+**1. Core User Journeys (The Happy Paths)**
+
+- [ ] **Admin Onboarding:** An Admin creates a new `MANAGER` user and a new `PROJECT`.
+- [ ] **Manager Project Setup:** A `MANAGER` logs in, creates several `TASKS`, and assigns them.
+- [x] **Viewer Task Completion:** A `VIEWER` logs in, finds an assigned task using `hasText`, and updates it to "Done".
+- [ ] **Full Lifecycle:** A single test following a task from Admin creation -> Viewer completion -> Admin verification.
+- [x] **Dashboard Data Consistency:** Verify Dashboard counters/charts match exactly after API setup.
+- [x] **Dashboard Empty State:** Login as a new user. Verify Dashboard shows correct "0 Projects" state.
+
+**2. RBAC & Security (Access Control)**
+
+- [x] **API Authorization:** A `VIEWER` attempts to delete a project via API directly. Verify 403.
+- [ ] **RBAC Security Check:** Verify a `VIEWER` cannot see the "Create Project" button (using strict ARIA roles).
+- [ ] **Direct URL Access:** A `VIEWER` tries to navigate to `/users`. Verify redirection.
+- [ ] **Logout Security:** Verify that clicking browser "Back" after logout does not reveal the dashboard.
+
+**3. Data Integrity & Edge Cases**
+
+- [ ] **Task Re-assignment:** A `MANAGER` re-assigns a task from User A to User B.
+- [ ] **Project Deletion Cascade:** Delete a project via API. Verify UI removes all associated tasks.
+- [ ] **Orphaned Data Handling:** Assign a task, then delete the user via API. Verify task becomes "Unassigned" in UI.
+- [ ] **NEW: Activity Log Sync:** Complete a task. Verify the "Activity Log" displays the exact action using `hasText`.
+
+**4. User Account Management**
+
+- [ ] **User Role Promotion:** An `ADMIN` promotes a `VIEWER` to `MANAGER`. Verify they gain UI permissions.
+- [ ] **Profile Update:** A user updates their password and name. Verify login with new credentials.
+- [ ] **NEW: Accessibility Navigation:** Navigate the User Settings form entirely using `getByLabel` and `getByRole` to catch missing ARIA attributes.
 
 **Phase 5: Concurrent E2E Flows (Multi-Actor Scenarios)**
 
