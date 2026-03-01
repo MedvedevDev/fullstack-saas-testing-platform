@@ -64,9 +64,10 @@ export class ApiHelper {
       name?: string;
       description?: string;
       status?: "ACTIVE" | "ARCHIVED";
+      ownerId?: string;
     },
   ) {
-    const response = await this.request.patch(
+    const response = await this.request.put(
       `${this.baseUrl}/projects/${projectId}`,
       {
         data,

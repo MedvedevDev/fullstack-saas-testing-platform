@@ -21,12 +21,12 @@
 
 **1. Core User Journeys (The Happy Paths)**
 
-- [ ] **Admin Onboarding:** An Admin creates a new `MANAGER` user and a new `PROJECT`.
-- [ ] **Manager Project Setup:** A `MANAGER` logs in, creates several `TASKS`, and assigns them.
+- [x] **Admin Onboarding:** An Admin creates a new `MANAGER` user and a new `PROJECT`.
+- [x] **Manager Project Setup:** A `MANAGER` logs in, creates several `TASKS`, and assigns them.
 - [x] **Viewer Task Completion:** A `VIEWER` logs in, finds an assigned task using `hasText`, and updates it to "Done".
 - [ ] **Full Lifecycle:** A single test following a task from Admin creation -> Viewer completion -> Admin verification.
 - [x] **Dashboard Data Consistency:** Verify Dashboard counters/charts match exactly after API setup.
-- [x] **Dashboard Empty State:** Login as a new user. Verify Dashboard shows correct "0 Projects" state.
+- [x] **Dashboard Empty State:** Login as a new user.sVerify Dashboard shows correct "0 Projects" state.
 
 **2. RBAC & Security (Access Control)**
 

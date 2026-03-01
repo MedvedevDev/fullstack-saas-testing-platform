@@ -68,7 +68,6 @@ test.describe("Admin Onboarding Flow @e2e", () => {
       (p: any) => p.name === projectName,
     );
     if (projectToDelete) await api.deleteProject(projectToDelete.id);
-
     const allUsers = await api.getUsers();
     const userToDelete = allUsers.find((u: any) => u.email === managerEmail);
     if (userToDelete) await api.deleteUser(userToDelete.id);

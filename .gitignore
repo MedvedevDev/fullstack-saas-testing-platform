@@ -11,3 +11,4 @@ USER_MANUAL.md
 /playwright/.cache/
 /playwright/.auth/
 roadmap.md
+TESTING_ROADMAP.md

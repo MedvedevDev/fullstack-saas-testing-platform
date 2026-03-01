@@ -66,7 +66,7 @@ export class ProjectsPage {
   async goto() {
     await this.page.goto("/projects");
 
-    await expect(this.createProjectButton).toBeVisible();
+    await expect(this.projectsList).toBeVisible();
   }
 
   /**
