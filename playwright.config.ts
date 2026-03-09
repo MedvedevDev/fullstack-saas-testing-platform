@@ -6,12 +6,12 @@ export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "blob" : "html",
   use: {
     baseURL,
-    trace: "retain-on-failure",
+    trace: "on-first-retry",
   },
   // webServer: [
   //   {
@@ -35,11 +35,20 @@ export default defineConfig({
     },
     {
       name: "chromium",
+      testIgnore: /auth\.spec\.ts/,
+      workers: 1,
       use: {
         ...devices["Desktop Chrome"],
         storageState: "playwright/.auth/user.json",
       },
       dependencies: ["setup"],
+    },
+    {
+      name: "unauthenticated",
+      testMatch: /auth\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+      },
     },
 
     // {
@@ -48,7 +57,7 @@ export default defineConfig({
     // },
 
     // {
-    //   name: "webkit",
+    //   name: "webkit",s
     //   use: { ...devices["Desktop Safari"] },
     // },
   ],

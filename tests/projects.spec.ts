@@ -9,15 +9,17 @@ import { getTodayDate } from "../utils/date-utils";
  */
 test.describe("Projects Module @regression", () => {
   let projectsPage: ProjectsPage;
-  let projectName: string | null = null;
+  let testProjects: string[] = [];
 
   test.beforeEach(async ({ page }) => {
     projectsPage = new ProjectsPage(page);
-    projectsPage.goto();
+    testProjects = [];
+    await projectsPage.goto();
   });
 
   test("verify create a new project @smoke @projects", async ({ page }) => {
-    projectName = `Auto Project ${Date.now()}`;
+    const projectName = `Auto Project ${Date.now()}`;
+    testProjects.push(projectName);
     const projectDesc = `Created via Playwright`;
     const currentDate = getTodayDate();
 
@@ -33,7 +35,7 @@ test.describe("Projects Module @regression", () => {
 
   test("verify delete a project @smoke @projects", async ({ page }) => {
     const name = `Delete me ${Date.now()}`;
-
+    // This project is not added to testProjects because the test verifies its deletion.
     await projectsPage.createProject(name, "Temp");
     await expect(page.getByText(name)).toBeVisible();
 
@@ -44,21 +46,29 @@ test.describe("Projects Module @regression", () => {
   });
 
   test("verify edit a project @projects", async ({ page }) => {
-    projectName = `Original ${Date.now()}`;
+    const originalName = `Original ${Date.now()}`;
+    testProjects.push(originalName);
     const newName = `Updated ${Date.now()}`;
     const currentDate = getTodayDate();
 
-    await projectsPage.createProject(projectName, "Initial Description");
+    await projectsPage.createProject(originalName, "Initial Description");
 
-    await projectsPage.editProject(projectName, {
+    await projectsPage.editProject(originalName, {
       name: newName,
       status: "ARCHIVED",
       description: "NEW DESCRIPTION",
       owner: "Change to any",
     });
+
+    // Replace originalName with newName for cleanup
+    const index = testProjects.indexOf(originalName);
+    if (index > -1) {
+      testProjects[index] = newName;
+    }
+
     // Verify Name Change
     await expect(page.getByText(newName)).toBeVisible();
-    await expect(page.getByText(projectName)).not.toBeVisible();
+    await expect(page.getByText(originalName)).not.toBeVisible();
 
     // Verify project details are correct
     await projectsPage.verifyProjectCard(newName, {
@@ -66,14 +76,21 @@ test.describe("Projects Module @regression", () => {
       status: "ARCHIVED",
       date: currentDate,
     });
-
-    // Clean up
-    projectName = newName;
   });
 
   test("verify filter  by status works correctly @projects", async ({
     page,
   }) => {
+    const activeProjectName = `Active Filter Project ${Date.now()}`;
+    const archivedProjectName = `Archived Filter Project ${Date.now()}`;
+    testProjects.push(activeProjectName, archivedProjectName);
+
+    // Create one active and one archived project
+    await projectsPage.createProject(activeProjectName, "Active project");
+    await projectsPage.createProject(archivedProjectName, "Project to be archived");
+    await projectsPage.editProject(archivedProjectName, { status: "ARCHIVED" });
+
+
     // Should display only Archived projects
     await projectsPage.verifyFilterFunction("ARCHIVED");
     // Should display only Active projects
@@ -81,8 +98,10 @@ test.describe("Projects Module @regression", () => {
   });
 
   test("verify search  works correctly @projects", async ({ page }) => {
-    const projectToSearch = `Project To Search`;
-    const projectToSearch2 = `Project To Search 2`;
+    const projectToSearch = `Project To Search ${Date.now()}`;
+    const projectToSearch2 = `Project To Search 2 ${Date.now()}`;
+    testProjects.push(projectToSearch, projectToSearch2);
+
     await projectsPage.createProject(projectToSearch, "Active description");
     await projectsPage.createProject(projectToSearch2, "Active description");
     // Search with valid name
@@ -90,18 +109,6 @@ test.describe("Projects Module @regression", () => {
 
     //Search with empty string
     await projectsPage.verifyEmptySearchState();
-    await projectsPage.searchInput.fill("");
-
-    // Clean up
-    const allTitles = await projectsPage.projectsList
-      .getByRole("heading", { level: 3 })
-      .allInnerTexts();
-    const titlesToDelete = allTitles.filter((title) =>
-      title.includes(projectToSearch),
-    );
-    for (const title of titlesToDelete) {
-      await projectsPage.deleteProject(projectToSearch);
-    }
   });
 
   test("create a project with an empty name @projects @negative", async ({
@@ -174,11 +181,17 @@ test.describe("Projects Module @regression", () => {
   });
 
   test.afterEach(async ({ page }) => {
-    if (projectName) {
-      const projectPage = new ProjectsPage(page);
-      await projectPage.goto();
-      await projectPage.deleteProject(projectName);
-      projectName = null;
+    if (testProjects.length > 0) {
+      await projectsPage.goto();
+      for (const name of testProjects) {
+        // Check if project exists before trying to delete to avoid errors
+        const projectCard = projectsPage.projectsList
+          .getByRole("link")
+          .filter({ hasText: name });
+        if ((await projectCard.count()) > 0) {
+          await projectsPage.deleteProject(name);
+        }
+      }
     }
   });
 });

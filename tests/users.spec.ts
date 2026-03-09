@@ -64,8 +64,8 @@ test.describe("Users Page @regression", () => {
   test("Search for a specific user by first and last name @users", async ({
     page,
   }) => {
-    const firstName = "Find";
-    const lastName = "Me";
+    const firstName = `Find${Date.now()}`;
+    const lastName = `Me${Date.now()}`;
     const email = `email${Date.now()}@gma2il.com`;
     testEmails.push(email);
 

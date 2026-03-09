@@ -31,7 +31,7 @@ test.describe("Dashboard E2E @e2e @dashboard", () => {
     const dashboardPage = new DashboardPage(page);
     const loginPage = new LoginPage(page);
     const email = `dashboard.stats${Date.now()}@ffdf.cc`;
-    const projectName = `Dashboard Start ${Date.now()}`;
+    const projectName = `Stats Project ${Date.now()}`;
 
     // Create Manager user, Project and Tasks
     await api.login("admin@flowdash.com", "password123");
@@ -66,7 +66,7 @@ test.describe("Dashboard E2E @e2e @dashboard", () => {
     const dashboardPage = new DashboardPage(page);
     const loginPage = new LoginPage(page);
     const email = `dashboard.stats${Date.now()}@ffdf.cc`;
-    const projectName = `Dashboard Start ${Date.now()}`;
+    const projectName = `Stats Project ${Date.now()}`;
 
     // Create Admin user, Project and Tasks
     await api.login("admin@flowdash.com", "password123");
@@ -101,7 +101,7 @@ test.describe("Dashboard E2E @e2e @dashboard", () => {
     const dashboardPage = new DashboardPage(page);
     const loginPage = new LoginPage(page);
     const email = `dashboard.stats${Date.now()}@ffdf.cc`;
-    const projectName = `Dashboard Start ${Date.now()}`;
+    const projectName = `Stats Project ${Date.now()}`;
 
     // Create a Project and Tasks
     await api.login("admin@flowdash.com", "password123");

@@ -14,7 +14,7 @@ test.describe("Project Details Module @regression", () => {
   });
 
   test("Verify Project details page for new project", async ({ page }) => {
-    const projectName = "Project Name To Test";
+    const projectName = `Project Name To Test ${Date.now()}`;
     const projectDesc = "Project Description To Test";
     await projectsPage.createProject(projectName, projectDesc);
     await projectsPage.openProject(projectName);

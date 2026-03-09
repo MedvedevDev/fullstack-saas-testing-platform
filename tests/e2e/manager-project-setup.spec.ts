@@ -43,7 +43,10 @@ test.describe("Manager roject Setup Flow @e2e", () => {
     // Login as Manager
     await loginPage.goto();
     await loginPage.login(managerEmail, "password123");
+    await expect(page).toHaveURL(/.*dashboard/); // Wait for login to complete
+
     await projectsPage.goto();
+    await page.reload(); // Reload to bust any frontend cache
     await projectsPage.openProject(projectName);
     // create tasks and assign the Viewer user
     await detailsPage.createTaskButton.click();

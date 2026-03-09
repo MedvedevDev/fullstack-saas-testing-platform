@@ -40,6 +40,7 @@ test.describe("Viewer Task Flow @e2e @tasks", () => {
     const taskRow = tasksPage.tasksTableBody
       .getByRole("row")
       .filter({ hasText: taskName });
+    await taskRow.hover();
     const editButton = taskRow.getByRole("button", { name: /edit task/i });
     await editButton.hover();
     await editButton.click();

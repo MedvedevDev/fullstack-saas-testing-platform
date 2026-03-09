@@ -13,13 +13,16 @@ export class SidebarComponent {
   constructor(page: Page) {
     this.page = page;
 
-    this.dashboardLink = page.getByRole("link", { name: /dashboard/i });
-    this.projectsLink = page.getByRole("link", { name: /projects/i });
-    this.tasksListLink = page.getByRole("link", { name: /tasks list/i });
-    this.boardViewLink = page.getByRole("link", { name: /board view/i });
-    this.teamLink = page.getByRole("link", { name: /team/i });
-    this.settingsLink = page.getByRole("link", { name: /settings/i });
-    this.logoutButton = page.getByRole("button", { name: /logout/i });
+    const nav = page.locator("nav");
+    const aside = page.locator("aside");
+
+    this.dashboardLink = nav.getByRole("link", { name: /dashboard/i });
+    this.projectsLink = nav.getByRole("link", { name: /projects/i });
+    this.tasksListLink = nav.getByRole("link", { name: /tasks list/i });
+    this.boardViewLink = nav.getByRole("link", { name: /board view/i });
+    this.teamLink = nav.getByRole("link", { name: /team/i });
+    this.settingsLink = nav.getByRole("link", { name: /settings/i });
+    this.logoutButton = aside.getByRole("button", { name: /logout/i });
   }
 
   async navigateTo(target: string) {

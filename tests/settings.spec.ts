@@ -20,6 +20,10 @@ test.describe("Settings Page @regression", () => {
   });
 
   test("Update profile name @settings", async ({ page }) => {
+    // Get original name from the input fields to restore it later
+    const originalFirstName = await settingsPage.firstNameInput.inputValue();
+    const originalLastName = await settingsPage.lastNameInput.inputValue();
+
     const newName = faker.person.firstName();
     const newLastName = faker.person.lastName();
 
@@ -28,9 +32,18 @@ test.describe("Settings Page @regression", () => {
 
     await page.reload();
 
+    // Verify header is updated
     await expect(settingsPage.headerName).toContainText(
       `${newName} ${newLastName}`,
+      { timeout: 10000 },
     );
+
+    // Verify input fields are updated
+    await expect(settingsPage.firstNameInput).toHaveValue(newName);
+    await expect(settingsPage.lastNameInput).toHaveValue(newLastName);
+
+    // Restore original name
+    await settingsPage.updateName(originalFirstName, originalLastName);
   });
 
   test("Update with mismatched passwords @negative @settings", async () => {

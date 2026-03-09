@@ -327,8 +327,8 @@ test.describe("Global Tasks Page @regression", () => {
   test("Edit and Delete a Task @smoke @tasks", async ({ page }) => {
     const projectName = `Project To Edit And Delete ${Date.now()}`;
     testProjects.push(projectName);
-    const taskName = "Task to Edit";
-    const updatedName = "Task is Updated";
+    const taskName = `Task to Edit ${Date.now()}`;
+    const updatedName = `Task is Updated ${Date.now()}`;
 
     await projectsPage.goto();
     await projectsPage.createProject(projectName, "Testing manage");
