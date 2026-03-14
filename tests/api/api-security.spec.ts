@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { ApiHelper } from "../../utils/ApiHelper";
+import { ApiHelper } from "@support/helpers/ApiHelper";
 
 test.describe("API Security & Authorization @e2e @api", () => {
   test("Viewer cannot delete a project via API", async ({ request }) => {

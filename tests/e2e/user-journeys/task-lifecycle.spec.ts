@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ProjectsPage } from "../pages/ProjectsPage";
-import { ProjectDetailsPage } from "../pages/ProjectDetailsPage";
-import { TaskModal } from "../pages/TaskModal";
-import { TasksPage } from "../pages/TasksPage";
-import { ApiHelper } from "../../utils/ApiHelper";
+import { LoginPage } from "../../support/pages/LoginPage";
+import { ProjectsPage } from "../../support/pages/ProjectsPage";
+import { ProjectDetailsPage } from "../../support/pages/ProjectDetailsPage";
+import { TaskModal } from "../../support/pages/TaskModal";
+import { TasksPage } from "../../support/pages/TasksPage";
+import { ApiHelper } from "../../support/helpers/ApiHelper";
 
-test.describe("Full Lifecycle Flow @e2e", () => {
+test.describe("Task Lifecycle Flow @e2e", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
   test("Task moves from Admin creation to Viewer completion to Admin verification", async ({

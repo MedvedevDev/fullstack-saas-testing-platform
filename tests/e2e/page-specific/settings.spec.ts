@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { SettingsPage } from "./pages/SettingsPage";
+import { SettingsPage } from "@support/pages/SettingsPage";
 import { faker } from "@faker-js/faker";
 
 /**
@@ -30,7 +30,9 @@ test.describe("Settings Page @regression", () => {
     await settingsPage.updateName(newName, newLastName);
     await expect(settingsPage.successMessage).toBeVisible();
 
-    await page.reload();
+    // Navigate away and back to force a full state refresh.
+    await page.goto("/dashboard");
+    await settingsPage.goto();
 
     // Verify header is updated
     await expect(settingsPage.headerName).toContainText(

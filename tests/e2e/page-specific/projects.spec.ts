@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { ProjectsPage } from "./pages/ProjectsPage";
-import { getTodayDate } from "../utils/date-utils";
+import { ProjectsPage } from "@support/pages/ProjectsPage";
+import { getTodayDate } from "@support/helpers/date-utils";
 
 /**
  * Project Management Module Tests.

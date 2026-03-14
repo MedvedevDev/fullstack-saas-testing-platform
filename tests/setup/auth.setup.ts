@@ -1,5 +1,5 @@
 import { test as setup, expect } from "@playwright/test";
-import { LoginPage } from "./pages/LoginPage";
+import { LoginPage } from "@support/pages/LoginPage";
 
 // Save browser cookies later
 const authFile = "playwright/.auth/user.json";

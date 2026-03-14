@@ -1,7 +1,7 @@
 import { test } from "@playwright/test";
-import { ApiHelper } from "../../utils/ApiHelper";
-import { DashboardPage } from "../pages/DashboardPage";
-import { LoginPage } from "../pages/LoginPage";
+import { ApiHelper } from "../../support/helpers/ApiHelper";
+import { DashboardPage } from "../../support/pages/DashboardPage";
+import { LoginPage } from "../../support/pages/LoginPage";
 
 test.describe("Dashboard E2E @e2e @dashboard", () => {
   test.use({ storageState: { cookies: [], origins: [] } });

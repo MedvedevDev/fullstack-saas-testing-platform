@@ -59,6 +59,7 @@ const SettingsPage = () => {
 
       await api.put("/users/me", payload);
       setSuccessMsg("Profile updated successfully!");
+      window.dispatchEvent(new CustomEvent("profile-updated"));
       setPasswords({ newPassword: "", confirmPassword: "" });
     } catch (err) {
       console.error("Failed to update", err);

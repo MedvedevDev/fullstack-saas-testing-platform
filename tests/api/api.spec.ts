@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-import { ApiHelper } from "../utils/ApiHelper";
+import { ApiHelper } from "@support/helpers/ApiHelper";
 
 test("API helpers for data setup and teardown", async ({ request }) => {
   const api = new ApiHelper(request);

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { ProjectsPage } from "./pages/ProjectsPage";
-import { ProjectDetailsPage } from "./pages/ProjectDetailsPage";
-import { TaskModal } from "./pages/TaskModal";
+import { ProjectsPage } from "@support/pages/ProjectsPage";
+import { ProjectDetailsPage } from "@support/pages/ProjectDetailsPage";
+import { TaskModal } from "@support/pages/TaskModal";
 
 test.describe("Project Details Module @regression", () => {
   let projectsPage: ProjectsPage;

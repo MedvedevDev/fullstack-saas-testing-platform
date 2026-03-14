@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { TaskModal } from "./pages/TaskModal";
-import { TasksPage } from "./pages/TasksPage";
-import { ProjectsPage } from "./pages/ProjectsPage";
-import { UsersPage } from "./pages/UsersPage";
-import { getFutureDate } from "../utils/date-utils";
+import { TaskModal } from "@support/pages/TaskModal";
+import { TasksPage } from "@support/pages/TasksPage";
+import { ProjectsPage } from "@support/pages/ProjectsPage";
+import { UsersPage } from "@support/pages/UsersPage";
+import { getFutureDate } from "@support/helpers/date-utils";
 
 /**
  * Tasks Module Tests.

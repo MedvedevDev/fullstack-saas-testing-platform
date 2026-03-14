@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { DashboardPage } from "../pages/DashboardPage";
-import { ProjectsPage } from "../pages/ProjectsPage";
-import { TaskModal } from "../pages/TaskModal";
-import { TasksPage } from "../pages/TasksPage";
-import { ApiHelper } from "../../utils/ApiHelper";
+import { LoginPage } from "../../support/pages/LoginPage";
+import { DashboardPage } from "../../support/pages/DashboardPage";
+import { ProjectsPage } from "../../support/pages/ProjectsPage";
+import { TaskModal } from "../../support/pages/TaskModal";
+import { TasksPage } from "../../support/pages/TasksPage";
+import { ApiHelper } from "../../support/helpers/ApiHelper";
 
 test.describe("Viewer Task Flow @e2e @tasks", () => {
   let loginPage: LoginPage;

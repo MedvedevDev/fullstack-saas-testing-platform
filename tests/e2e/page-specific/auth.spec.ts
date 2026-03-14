@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "./pages/LoginPage";
+import { LoginPage } from "@support/pages/LoginPage";
 
 test.describe("Athentication Module", () => {
   let loginPage: LoginPage;
@@ -11,7 +11,6 @@ test.describe("Athentication Module", () => {
 
   /**
    * Positive Test: Verifies that a user with valid credentials can access the dashboard.
-   * Critical User Journey (CUJ) for all user roles.
    */
   test("should allow access with valid admin credentials", async ({ page }) => {
     await loginPage.login("admin@flowdash.com", "password123");

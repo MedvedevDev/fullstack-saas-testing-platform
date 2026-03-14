@@ -18,6 +18,13 @@ const DashboardLayout = () => {
       }
     };
     fetchUser();
+
+    const handleProfileUpdate = () => fetchUser();
+    window.addEventListener("profile-updated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("profile-updated", handleProfileUpdate);
+    };
   }, [location.pathname]);
 
   return (

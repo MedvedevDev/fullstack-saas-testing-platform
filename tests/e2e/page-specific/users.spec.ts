@@ -1,5 +1,5 @@
 import test, { expect } from "@playwright/test";
-import { UsersPage } from "./pages/UsersPage";
+import { UsersPage } from "@support/pages/UsersPage";
 
 /**
  * Users Module Tests.

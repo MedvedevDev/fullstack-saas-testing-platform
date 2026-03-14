@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ProjectsPage } from "../pages/ProjectsPage";
-import { ProjectDetailsPage } from "../pages/ProjectDetailsPage";
-import { TaskModal } from "../pages/TaskModal";
-import { ApiHelper } from "../../utils/ApiHelper";
+import { LoginPage } from "../../support/pages/LoginPage";
+import { ProjectsPage } from "../../support/pages/ProjectsPage";
+import { ProjectDetailsPage } from "../../support/pages/ProjectDetailsPage";
+import { TaskModal } from "../../support/pages/TaskModal";
+import { ApiHelper } from "../../support/helpers/ApiHelper";
 
 test.describe("Manager roject Setup Flow @e2e", () => {
   test.use({ storageState: { cookies: [], origins: [] } });

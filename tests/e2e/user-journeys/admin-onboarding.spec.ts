@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { UsersPage } from "../pages/UsersPage";
-import { ProjectsPage } from "../pages/ProjectsPage";
-import { DashboardPage } from "../pages/DashboardPage";
-import { ApiHelper } from "../../utils/ApiHelper";
+import { LoginPage } from "@support/pages/LoginPage";
+import { UsersPage } from "@support/pages/UsersPage";
+import { ProjectsPage } from "@support/pages/ProjectsPage";
+import { DashboardPage } from "@support/pages/DashboardPage";
+import { ApiHelper } from "@support/helpers/ApiHelper";
 
 test.describe("Admin Onboarding Flow @e2e", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
