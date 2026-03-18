@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, Navigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../api/axios";
 
 const DashboardLayout = () => {
-  const [user, setUser] = useState({ firstName: "", lastName: "" });
+  const [user, setUser] = useState({ firstName: "", lastName: "", roles: [] });
   const location = useLocation();
 
   // Fetch user data whenever the layout mounts or the route changes
@@ -13,6 +13,8 @@ const DashboardLayout = () => {
       try {
         const response = await api.get("/users/me");
         setUser(response.data);
+        // Also store user in local storage for quick access
+        localStorage.setItem("user", JSON.stringify(response.data));
       } catch (err) {
         console.error("Failed to fetch user profile", err);
       }
@@ -26,6 +28,13 @@ const DashboardLayout = () => {
       window.removeEventListener("profile-updated", handleProfileUpdate);
     };
   }, [location.pathname]);
+
+  // RBAC redirect logic
+  const userRoles = user.roles.map((r: any) => r.name);
+  if (userRoles.includes("VIEWER") && location.pathname.startsWith("/users")) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
 
   return (
     <div className="flex bg-flow-bg min-h-screen font-sans text-flow-text-main transition-colors duration-300">

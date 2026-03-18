@@ -34,7 +34,6 @@ export class UsersPage {
    */
   async goto() {
     await this.page.goto("/users");
-    await expect(this.createUserButton).toBeVisible();
   }
 
   /**

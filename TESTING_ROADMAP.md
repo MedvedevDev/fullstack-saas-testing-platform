@@ -24,15 +24,15 @@
 - [x] **Admin Onboarding:** An Admin creates a new `MANAGER` user and a new `PROJECT`.
 - [x] **Manager Project Setup:** A `MANAGER` logs in, creates several `TASKS`, and assigns them.
 - [x] **Viewer Task Completion:** A `VIEWER` logs in, finds an assigned task using `hasText`, and updates it to "Done".
-- [x] **Full Lifecycle:** A single test following a task from Admin creation -> Viewer completion -> Admin verification.
+- [x] **Full Lifecycle:** A ssingle test following a task from Admin creation -> Viewer completion -> Admin verification.
 - [x] **Dashboard Data Consistency:** Verify Dashboard counters/charts match exactly after API setup.
 - [x] **Dashboard Empty State:** Login as a new user.sVerify Dashboard shows correct "0 Projects" state.
 
 **2. RBAC & Security (Access Control)**
 
 - [x] **API Authorization:** A `VIEWER` attempts to delete a project via API directly. Verify 403.
-- [ ] **RBAC Security Check:** Verify a `VIEWER` cannot see the "Create Project" button (using strict ARIA roles).
-- [ ] **Direct URL Access:** A `VIEWER` tries to navigate to `/users`. Verify redirection.
+- [x] **RBAC Security Check:** Verify a `VIEWER` cannot see the "Create Project" button (using strict ARIA roles).
+- [x] **Direct URL Access:** A `VIEWER` tries to navigate to `/users`. Verify redirection.
 - [ ] **Logout Security:** Verify that clicking browser "Back" after logout does not reveal the dashboard.
 
 **3. Data Integrity & Edge Cases**

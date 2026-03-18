@@ -6,10 +6,12 @@ export class ProjectDetailsPage {
   readonly tasksHeader: Locator;
   readonly createTaskButton: Locator;
   readonly tasksTable: Locator;
+  header: Locator;
 
   constructor(page: Page) {
     this.page = page;
     // Header Elements
+    this.header = this.page.locator("div:has(> h1)");
     this.backButton = page.getByRole("button", { name: /back to projects/i });
     // Task Section
     this.createTaskButton = page.getByRole("button", { name: /create task/i });
@@ -21,13 +23,14 @@ export class ProjectDetailsPage {
    * Verify Header Data
    */
   async verifyHeader(name: string, status: string) {
-    const projectTitle = this.page.getByRole("heading", {
+    this.header = this.page.locator(`div:has(> h1:has-text("${name}"))`);
+    const projectTitle = this.header.getByRole("heading", {
       name: name,
       exact: true,
     });
     await expect(projectTitle).toBeVisible();
 
-    const statusBadge = this.page.locator("span").filter({ hasText: status });
+    const statusBadge = this.header.locator("span").filter({ hasText: status });
     await expect(statusBadge).toBeVisible();
   }
 
