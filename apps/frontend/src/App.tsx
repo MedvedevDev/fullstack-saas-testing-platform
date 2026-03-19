@@ -14,6 +14,7 @@ import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import TasksKanbanPage from "./pages/TasksKanbanPage";
 import SettingsPage from "./pages/SettingsPage";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -24,14 +25,16 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected Dashboard Routes */}
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/tasks" element={<TasksPage />} />
-            <Route path="/tasks/board" element={<TasksKanbanPage />} />
-            <Route path="/users" element={<UsersPage />} />
-            <Route path="/projects" element={<ProjectsPage />} />
-            <Route path="/projects/:id" element={<ProjectDetailsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/tasks" element={<TasksPage />} />
+              <Route path="/tasks/board" element={<TasksKanbanPage />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/projects" element={<ProjectsPage />} />
+              <Route path="/projects/:id" element={<ProjectDetailsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
           </Route>
 
           {/* Redirect root to login */}

@@ -33,7 +33,7 @@
 - [x] **API Authorization:** A `VIEWER` attempts to delete a project via API directly. Verify 403.
 - [x] **RBAC Security Check:** Verify a `VIEWER` cannot see the "Create Project" button (using strict ARIA roles).
 - [x] **Direct URL Access:** A `VIEWER` tries to navigate to `/users`. Verify redirection.
-- [ ] **Logout Security:** Verify that clicking browser "Back" after logout does not reveal the dashboard.
+- [x] **Logout Security:** Verify that clicking browser "Back" after logout does not reveal the dashboard.
 
 **3. Data Integrity & Edge Cases**
 
