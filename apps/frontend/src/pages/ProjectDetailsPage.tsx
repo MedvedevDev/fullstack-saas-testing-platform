@@ -36,6 +36,7 @@ const ProjectDetailsPage = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null); // NEW
 
   const [canManage, setCanManage] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Fetch Project Data (Moved to reusable function)
   const fetchProject = async () => {
@@ -54,6 +55,7 @@ const ProjectDetailsPage = () => {
     const userStr = localStorage.getItem("user");
     if (userStr) {
       const user: User = JSON.parse(userStr);
+      setCurrentUser(user);
       const hasPermission = user.roles.some(
         (r) => r.name === "ADMIN" || r.name === "MANAGER",
       );
@@ -81,6 +83,13 @@ const ProjectDetailsPage = () => {
       default:
         return <AlertCircle className="h-4 w-4 text-slate-400" />;
     }
+  };
+
+  // Check if current user can edit a task
+  const canEditTask = (task: Task): boolean => {
+    if (canManage) return true; // ADMIN/MANAGER can always edit
+    // VIEWER can edit if assigned to the task
+    return currentUser?.id === task.assigneeId;
   };
 
   if (loading)
@@ -228,23 +237,27 @@ const ProjectDetailsPage = () => {
                   </td>
 
                   {/* Action Buttons (Edit/Delete) */}
-                  {canManage && (
+                  {(canManage || canEditTask(task)) && (
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => setEditingTask(task)}
                           className="p-1.5 text-gray-400 hover:text-flow-blue hover:bg-blue-50 rounded"
                           title="Edit Task"
+                          aria-label="Edit Task"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
-                          title="Delete Task"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {canManage && (
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                            title="Delete Task"
+                            aria-label="Delete Task"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   )}

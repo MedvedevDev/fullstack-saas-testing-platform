@@ -34,6 +34,16 @@ export class DashboardPage {
     await this.page.goto("/dashboard");
   }
 
+  /**
+   * Verifies that a specific text string appears in the main dashboard area.
+   */
+  async verifyActivity(text: string) {
+    // We scope to 'main' to avoid finding text in the sidebar or navbar
+    await expect(
+      this.page.locator("main").getByText(text).first(),
+    ).toBeVisible();
+  }
+
   async verifyEmptyState() {
     await expect(this.totalProjectsBlock).toHaveText("0");
     await expect(this.totalTasksBlock).toHaveText("0");
